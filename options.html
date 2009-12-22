@@ -1,0 +1,150 @@
+<html>
+<head>
+<title>FastLookUp</title>
+<style>
+body {
+    background-color: #F7F7F7;
+    color: #333;
+    font-size: 13px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+}
+.logo {
+    width:700px; 
+    background: #FFFFFF;
+    color: #FFFFFF;
+    margin-left:auto; 
+    margin-right:auto;
+    font-size: 30px;
+    -webkit-border-radius: 7px;
+    -webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+    padding:7px 7px 7px 7px;
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#B5B5B5), to(#808080));
+    text-shadow: 0px -1px 1px rgba(0, 0, 0, 0.25);
+    position: relative;
+}
+.title {
+    color: #888888;
+    font-size: 15px;
+}
+.menu {
+    width:700px;
+    background: #FFFFFF;
+    margin-left:auto;
+    margin-right:auto;
+    -webkit-border-radius: 7px;
+    -webkit-box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+    padding:7px 7px 7px 7px;
+    text-align: left;
+}
+.buttons {
+    width: 100px;
+}
+</style>
+<script>
+function set()
+{
+    var font_size = localStorage.getItem( "font_size" );
+    var shortcut1 = localStorage.getItem( "shortcut1" );
+    var shortcut2 = localStorage.getItem( "shortcut2" );
+    var i;
+
+    if( !font_size ){
+        font_size = 13;
+    }
+    for( i = 0; i < document.options.font_size.length; i++ ){
+        if( document.options.font_size[i].value == font_size ){
+            document.options.font_size[i].selected = true;
+        }
+    }
+
+    if( !shortcut1 && !shortcut2 ){
+        shortcut1 = 'none';
+        shortcut2 = 'Ctrl';
+    }
+    else if( !shortcut1 ){
+        shortcut1 = 'none';
+    }
+    else if( !shortcut2 ){
+        shortcut2 = 'none';
+    }
+    for( i = 0; i < document.options.shortcut1.length; i++ ){
+        if( document.options.shortcut1[i].value == shortcut1 ){
+            document.options.shortcut1[i].selected = true;
+        }
+    }
+    for( i = 0; i < document.options.shortcut2.length; i++ ){
+        if( document.options.shortcut2[i].value == shortcut2 ){
+            document.options.shortcut2[i].selected = true;
+        }
+    }
+}
+
+function save()
+{
+    var font_size = document.options.font_size[document.options.font_size.selectedIndex].value;
+    var shortcut1 = document.options.shortcut1[document.options.shortcut1.selectedIndex].value;
+    var shortcut2 = document.options.shortcut2[document.options.shortcut2.selectedIndex].value;
+    
+    localStorage.setItem( "font_size", font_size );
+    localStorage.setItem( "shortcut1", shortcut1 );
+    localStorage.setItem( "shortcut2", shortcut2 );
+}
+
+</script>
+</head>
+<body onload='set()'>
+<center>
+<div class="logo">FastLookUp</div>
+<br>
+<form name="options">
+    <div class='menu'>
+        <div class='title'>Font</div>
+        <br>
+        <b>size</b>
+        <select name='font_size'>
+            <option>8</option>
+            <option>9</option>
+            <option>10</option>
+            <option>11</option>
+            <option>12</option>
+            <option>13</option>
+            <option>14</option>
+            <option>15</option>
+            <option>16</option>
+            <option>17</option>
+            <option>18</option>
+            <option>19</option>
+            <option>20</option>
+            <option>21</option>
+            <option>22</option>
+            <option>23</option>
+            <option>24</option>
+        </select>
+        <b>px</b>
+        <br><br>
+        <div class='title'>Shortcut</div>
+        <br>
+        <select name='shortcut1'>
+            <option>none</option>
+            <option>Shift</option>
+            <option>Ctrl</option>
+            <option>Alt</option>
+        </select>
+        <b>+</b>
+        <select name='shortcut2'>
+            <option>none</option>
+            <option>Shift</option>
+            <option>Ctrl</option>
+            <option>Alt</option>
+        </select>
+        <b>+ Select</b>
+    </div>
+    <br>
+    <input type='button' class='buttons' name='apply' value='Apply' onclick='save()'>
+    <input type='button' class='buttons' name='exit' value='Exit' onclick='window.close()'>
+</form>
+</center>
+</body>
+</html>
