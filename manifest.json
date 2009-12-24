@@ -13,5 +13,6 @@
         "matches": ["http://*/*","https://*/*"],
         "js": ["fastlookup.js"]
         }
-    ]
+    ],
+    "update_url": "http://github.com/yuta/FastLookUp-for-Chrome/blob/master/updates.xml"
 }

@@ -58,9 +58,9 @@ window.Parser = {
         }
         
         for( var i = 0; i < r.snapshotLength; i++ ){
-            // <a>タグを除きます
+            // <a>タグはポップアップ表示に変換します
             var e = r.snapshotItem(i);
-            e.innerHTML = e.innerHTML.replace( /<a .+?\/a>/g, "" );
+            e.innerHTML = e.innerHTML.replace( /<a/g, "<a onclick='window.open(this.href, \"fastlookpop\", \"menubar=no, toolbar=no\"); return false;'" );
             res.push( e );
             //res.push( r.snapshotItem(i) );
         }
@@ -182,8 +182,9 @@ window.PopUp = {
     {
         var res = [];
         var e = document.createElement( "div" );
-        e.innerHTML = "項目が見つかりませんでした errno:" + errno;
+        e.innerHTML = "項目が見つかりませんでした";
         res.push( e );
+        console.error( "errno:"+errno );
         PopUp.show( res );
     },
 
