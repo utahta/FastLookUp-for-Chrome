@@ -1,6 +1,6 @@
 {
     "name": "FastLookUp",
-    "version": "0.1",
+    "version": "0.1.1",
     "description": "A translator extension for japanese. like fastlookupalc.",
     "options_page": "options.html",
     "background_page": "background.html",
