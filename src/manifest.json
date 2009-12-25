@@ -1,7 +1,7 @@
 {
     "name": "FastLookUp for Chrome",
-    "version": "0.1.21",
-    "description": "A translator extension for chrome. like fastlook*.",
+    "version": "0.1.2.1",
+    "description": "A translator extension for chrome. like fastlookup*.",
     "options_page": "options.html",
     "background_page": "background.html",
     "permissions": [
