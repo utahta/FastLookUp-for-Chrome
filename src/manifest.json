@@ -1,12 +1,13 @@
 {
     "name": "FastLookUp for Chrome",
     "version": "0.1.2",
-    "description": "A translator extension for japanese. like fastlookupalc.",
+    "description": "A translator extension for chrome. like fastlook*.",
     "options_page": "options.html",
     "background_page": "background.html",
     "permissions": [
         "tabs",
-        "http://*/*"
+        "http://*/*",
+        "https://*/*"
     ],
     "content_scripts": [
         {
