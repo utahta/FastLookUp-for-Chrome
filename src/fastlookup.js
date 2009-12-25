@@ -61,6 +61,7 @@ window.Parser = {
             // <a>タグはポップアップ表示に変換します
             var e = r.snapshotItem(i);
             e.innerHTML = e.innerHTML.replace( /<a/g, "<a onclick='window.open(this.href, \"fastlookpop\", \"menubar=no, toolbar=no\"); return false;'" );
+            e.innerHTML = e.innerHTML.replace( /<img/g, "<img class='fastlookup_img'" );
             res.push( e );
             //res.push( r.snapshotItem(i) );
         }
@@ -129,6 +130,7 @@ window.PopUp = {
                     'font-weight: normal',
                     'text-align: left',
                     'padding:7px 7px 7px 7px',
+                    'margin:0 0 0 0',
                     'z-index: 9998',
                     '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
                     '-webkit-border-radius: 7px',
@@ -173,7 +175,7 @@ window.PopUp = {
     {
         var res = [];
         var e = document.createElement( "div" );
-        e.innerHTML = "<img src='"+loading_img_url+"'> 検索中...";
+        e.innerHTML = "<img src='"+loading_img_url+"' class='fastlookup_img'> 検索中...";
         res.push( e );
         PopUp.show( res );
     },
@@ -314,6 +316,24 @@ function checkKeys( ev )
 {
     return ev.ctrlKey == Options.ctrl_key && ev.shiftKey == Options.shift_key && ev.altKey == Options.alt_key;
 }
+
+function addStyle()
+{
+    var s = document.createElement( "style" );
+    var sc = document.createTextNode( ".fastlookup_img {padding:0; margin:0;}" );
+    s.type = "text/css";
+
+    if( s.styleSheet ){
+        s.styleSheet.cssText = sc.nodeValue;
+    }
+    else{
+        s.appendChild( sc );
+        document.getElementsByTagName( "head" )[0].appendChild( s )
+    }
+}
+
+// Add style.
+addStyle();
 
 // Load options.
 Connection = chrome.extension.connect( {name:"fastlookup"} );
