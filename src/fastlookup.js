@@ -192,6 +192,7 @@ window.PopUp = {
         var e = document.createElement( "div" );
         var i = document.createElement( "img" );
         i.src = loading_img_url;
+        i.setAttribute( "class", "fastlookup_img" );
         var t = document.createTextNode( " 検索中..." );
         e.appendChild( i );
         e.appendChild( t );
@@ -339,7 +340,7 @@ function checkKeys( ev )
 function addStyle()
 {
     var s = document.createElement( "style" );
-    var sc = document.createTextNode( ".fastlookup_img {padding:0; margin:0;}" );
+    var sc = document.createTextNode( ".fastlookup_img {padding:0; margin:0; display:inline;}" );
     s.type = "text/css";
     s.appendChild( sc );
     document.getElementsByTagName( "head" )[0].appendChild( s )
