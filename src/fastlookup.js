@@ -58,12 +58,16 @@ window.Parser = {
         }
         
         for( var i = 0; i < r.snapshotLength; i++ ){
-            // <a>タグはポップアップ表示に変換します
-            var e = r.snapshotItem(i);
-            e.innerHTML = e.innerHTML.replace( /<a/g, "<a onclick='window.open(this.href, \"fastlookpop\", \"menubar=no, toolbar=no\"); return false;'" );
-            e.innerHTML = e.innerHTML.replace( /<img/g, "<img class='fastlookup_img'" );
-            res.push( e );
-            //res.push( r.snapshotItem(i) );
+            try{
+                // <a>タグはポップアップ表示に変換します
+                var e = r.snapshotItem(i);
+                e.innerHTML = e.innerHTML.replace( /<a/g, "<a onclick='window.open(this.href, \"fastlookpop\", \"menubar=no, toolbar=no\"); return false;'" );
+                e.innerHTML = e.innerHTML.replace( /<img/g, "<img class='fastlookup_img'" );
+                res.push( e );
+            }
+            catch(e){
+                res.push( r.snapshotItem(i) );
+            }
         }
         res.push( Utility.createTag( "excite翻訳", "http://www.excite.co.jp/world/" ) );
         return res;
@@ -81,11 +85,17 @@ window.Parser = {
 
     getSnapshot: function( exp, txt )
     {
-        var e = document.createElement( "div" );
-        e.innerHTML = txt;
+        try{
+            var e = document.createElement( "div" );
+            e.innerHTML = txt; // throw dom exception.
+        }
+        catch(e){
+            return false;
+        }
         
         var resolver = function( prefix ){
-            var r = document.createNSResolver(e)(prefix);
+            var o = e.ownerDocument == null ? e.documentElement : e.ownerDocument.documentElement;
+            var r = document.createNSResolver(o)(prefix);
             return r ? r : (document.contentType == "text/html") ? "" : "http://www.w3.org/1999/xhtml";
         }
         try{
@@ -107,6 +117,11 @@ window.MousePos = {
     {
         MousePos.x = ev.pageX;
         MousePos.y = ev.pageY;
+    },
+
+    debugPrint: function()
+    {
+        alert( "x:"+MousePos.x+" y:"+MousePos.y );
     }
 }
 
@@ -175,7 +190,11 @@ window.PopUp = {
     {
         var res = [];
         var e = document.createElement( "div" );
-        e.innerHTML = "<img src='"+loading_img_url+"' class='fastlookup_img'> 検索中...";
+        var i = document.createElement( "img" );
+        i.src = loading_img_url;
+        var t = document.createTextNode( " 検索中..." );
+        e.appendChild( i );
+        e.appendChild( t );
         res.push( e );
         PopUp.show( res );
     },
@@ -184,7 +203,7 @@ window.PopUp = {
     {
         var res = [];
         var e = document.createElement( "div" );
-        e.innerHTML = "項目が見つかりませんでした";
+        e.appendChild( document.createTextNode( "項目が見つかりませんでした" ) );
         res.push( e );
         console.error( "errno:"+errno );
         PopUp.show( res );
@@ -194,7 +213,7 @@ window.PopUp = {
     {
         var res = [];
         var e = document.createElement( "div" );
-        e.innerHTML = "項目が見つかりませんでした";
+        e.appendChild( document.createTextNode( "項目が見つかりませんでした" ) );
         res.push( e );
         PopUp.show( res );
     }
@@ -322,14 +341,8 @@ function addStyle()
     var s = document.createElement( "style" );
     var sc = document.createTextNode( ".fastlookup_img {padding:0; margin:0;}" );
     s.type = "text/css";
-
-    if( s.styleSheet ){
-        s.styleSheet.cssText = sc.nodeValue;
-    }
-    else{
-        s.appendChild( sc );
-        document.getElementsByTagName( "head" )[0].appendChild( s )
-    }
+    s.appendChild( sc );
+    document.getElementsByTagName( "head" )[0].appendChild( s )
 }
 
 // Add style.
