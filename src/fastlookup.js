@@ -5,7 +5,7 @@ window.Utility = {
     createTag: function( txt, url )
     {
         var e = document.createElement( "div" );
-        e.innerHTML = "By <a href='"+url+"' onclick='window.open(this.href, \"fastlookpop\"); return false;'>"+txt+"</a>";
+        e.innerHTML = "by <a href='"+url+"' onclick='window.open(this.href, \"fastlookpop\"); return false;'>"+txt+"</a>";
         return e;
     }
 }
@@ -62,7 +62,6 @@ window.Parser = {
                 // <a>タグはポップアップ表示に変換します
                 var e = r.snapshotItem(i);
                 e.innerHTML = e.innerHTML.replace( /<a/g, "<a onclick='window.open(this.href, \"fastlookpop\", \"menubar=no, toolbar=no\"); return false;'" );
-                e.innerHTML = e.innerHTML.replace( /<img/g, "<img class='fastlookup_img'" );
                 res.push( e );
             }
             catch(e){
@@ -340,11 +339,13 @@ function checkKeys( ev )
 function addStyle()
 {
     var s = document.createElement( "style" );
-    var sc = document.createTextNode( ".fastlookup_img {padding:0; margin:0; display:inline;}" );
+    var sc = document.createTextNode( "#fastlookup{color:#000;} #fastlookup img{padding:0; margin:0; display:inline;} #fastlookup a{color:#000;}" );
     s.type = "text/css";
     s.appendChild( sc );
     document.getElementsByTagName( "head" )[0].appendChild( s )
 }
+
+// --- main ---
 
 // Add style.
 addStyle();
@@ -359,7 +360,7 @@ Connection.postMessage( {msgid:"options"} );
 System.push( "excite_pre" );    // excite.
 System.push( "google" );        // google.
 
-// main & trigger.
+// trigger.
 document.addEventListener( "mouseup", function( ev ){
     if( !checkId( ev ) ){
         var txt = window.getSelection().toString();
