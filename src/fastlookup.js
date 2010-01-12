@@ -25,7 +25,7 @@ window.Parser = {
         for( var i = 0; i < r.snapshotLength; i++ ){
             res.push( r.snapshotItem(i) );
         }
-        res.push( Utility.createTag( "英辞郎 on the WEB", "http://www.alc.co.jp/" ) );
+        //res.push( Utility.createTag( "英辞郎 on the WEB", "http://www.alc.co.jp/" ) );
         return res;
     },
     
@@ -68,7 +68,7 @@ window.Parser = {
                 res.push( r.snapshotItem(i) );
             }
         }
-        res.push( Utility.createTag( "excite翻訳", "http://www.excite.co.jp/world/" ) );
+        //res.push( Utility.createTag( "excite翻訳", "http://www.excite.co.jp/world/" ) );
         return res;
     },
     
@@ -78,7 +78,7 @@ window.Parser = {
         var e = document.createElement( "div" );
         e.innerHTML = txt;
         res.push( e );
-        res.push( Utility.createTag( "google翻訳", "http://translate.google.co.jp/" ) );
+        //res.push( Utility.createTag( "google翻訳", "http://translate.google.co.jp/" ) );
         return res;
     },
 

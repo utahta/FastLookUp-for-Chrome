@@ -61,12 +61,26 @@ window.Request = {
 window.Options = {
     check: function()
     {
-        var exist = localStorage.getItem( "exist" );
-        if( !exist ){
+        var font_size = localStorage.getItem( "font_size" );
+        var use_excite = localStorage.getItem( "use_excite" );
+        var use_google = localStorage.getItem( "use_google" );
+        var shortcut1 = localStorage.getItem( "shortcut1" );
+        var shortcut2 = localStorage.getItem( "shortcut2" );
+        
+        if( font_size == null ){
             localStorage.setItem( "font_size", 13 );
+        }
+        if( use_excite == null ){
+            localStorage.setItem( "use_excite", "true" );
+        }
+        if( use_google == null ){
+            localStorage.setItem( "use_google", "true" );
+        }
+        if( shortcut1 == null ){
             localStorage.setItem( "shortcut1", "none" );
-            localStorage.setItem( "shortcut2", "Ctrl" );
-            localStorage.setItem( "exist", true );
+        }
+        if( shortcut2 == null ){
+            localStorage.setItem( "shortcut2", "none" );
         }
     },
     
