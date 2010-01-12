@@ -73,9 +73,16 @@ window.Options = {
     load: function()
     {
         var font_size = localStorage.getItem( "font_size" );
+        var use_excite = localStorage.getItem( "use_excite" );
+        var use_google = localStorage.getItem( "use_google" );
         var shortcut1 = localStorage.getItem( "shortcut1" );
         var shortcut2 = localStorage.getItem( "shortcut2" );
-        Connection.postMessage( {msgid:"options", font_size:font_size, shortcut1:shortcut1, shortcut2:shortcut2 } );
+        Connection.postMessage( {msgid:"options", 
+                                 font_size:font_size, 
+                                 use_excite:use_excite,
+                                 use_google:use_google,
+                                 shortcut1:shortcut1, 
+                                 shortcut2:shortcut2 } );
     }
 }
 

@@ -257,6 +257,16 @@ window.Options = {
     set: function( arg ) 
     {
         Options.font_size = arg.font_size;
+
+        // System setting.
+        //System.push( "alc" );         // alc. プラグインとして利用すると規約違反らしいので無効化
+        if( arg.use_excite == "true" ){
+            System.push( "excite_pre" );    // excite.
+        }
+        if( arg.use_google == "true" ){
+            System.push( "google" );        // google.
+        }
+
         if( arg.shortcut1 == "Shift" || arg.shortcut2 == "Shift" ){
             Options.shift_key = true;
         }
@@ -354,11 +364,6 @@ addStyle();
 Connection = chrome.extension.connect( {name:"fastlookup"} );
 Connection.onMessage.addListener( Receiver.message );
 Connection.postMessage( {msgid:"options"} );
-
-// System setting.
-//System.push( "alc" );         // alc. プラグインとして利用すると規約違反らしいので無効化
-System.push( "excite_pre" );    // excite.
-System.push( "google" );        // google.
 
 // trigger.
 document.addEventListener( "mouseup", function( ev ){
