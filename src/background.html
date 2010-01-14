@@ -62,41 +62,39 @@ window.Options = {
     check: function()
     {
         var font_size = localStorage.getItem( "font_size" );
-        var use_excite = localStorage.getItem( "use_excite" );
-        var use_google = localStorage.getItem( "use_google" );
-        var shortcut1 = localStorage.getItem( "shortcut1" );
-        var shortcut2 = localStorage.getItem( "shortcut2" );
+        eval( "var excite = " + localStorage.getItem( "excite" ) );
+        eval( "var google = " + localStorage.getItem( "google" ) );
         
         if( font_size == null ){
             localStorage.setItem( "font_size", 13 );
         }
-        if( use_excite == null ){
-            localStorage.setItem( "use_excite", "true" );
+
+        if( excite == null ){
+            excite = {}
+            excite['use'] = 'true';
+            excite['sc1'] = 'none';
+            excite['sc2'] = 'Ctrl';
+            localStorage.setItem( "excite", toSource( excite ) );
         }
-        if( use_google == null ){
-            localStorage.setItem( "use_google", "true" );
-        }
-        if( shortcut1 == null ){
-            localStorage.setItem( "shortcut1", "none" );
-        }
-        if( shortcut2 == null ){
-            localStorage.setItem( "shortcut2", "Ctrl" );
-        }
+
+        if( google == null ){
+            google = {}
+            google['use'] = 'true';
+            google['sc1'] = 'none';
+            google['sc2'] = 'Ctrl';
+            localStorage.setItem( "google", toSource( google ) );
+        }        
     },
     
     load: function()
     {
         var font_size = localStorage.getItem( "font_size" );
-        var use_excite = localStorage.getItem( "use_excite" );
-        var use_google = localStorage.getItem( "use_google" );
-        var shortcut1 = localStorage.getItem( "shortcut1" );
-        var shortcut2 = localStorage.getItem( "shortcut2" );
+        var excite = localStorage.getItem( "excite" );
+        var google = localStorage.getItem( "google" );
         Connection.postMessage( {msgid:"options", 
                                  font_size:font_size, 
-                                 use_excite:use_excite,
-                                 use_google:use_google,
-                                 shortcut1:shortcut1, 
-                                 shortcut2:shortcut2 } );
+                                 excite:excite,
+                                 google:google} );
     }
 }
 
@@ -130,6 +128,17 @@ chrome.extension.onConnect.addListener( function onPortConnect( con ){
     Connection = con;
     Connection.onMessage.addListener( Receiver.message );
 });
+
+// see options.html
+function toSource( elm )
+{
+    var out = '';
+    for( var key in elm ){
+        if( out != '' ) out += ',';
+        out += "'"+key+"':'"+elm[key]+"'";
+    }
+    return '{' + out + '}';
+}
 
 // ecl.js
 // http://nurucom-archives.hp.infoseek.co.jp/digital/escape-codec-library.html

@@ -1,9 +1,7 @@
 <html>
 <head>
 <title>FastLookUp for Chrome</title>
-<!--
 <script type="text/javascript" src="jquery-1.3.2.min.js"></script>
--->
 <style>
 body {
     background-color: #F7F7F7;
@@ -44,6 +42,12 @@ body {
     color: #888888;
     font-size: 15px;
 }
+
+.contents {
+    padding-top: 3px;
+    padding-left: 10px;
+}
+
 .menu {
     width:700px;
     background: #FFFFFF;
@@ -62,12 +66,11 @@ body {
 function set()
 {
     var font_size = localStorage.getItem( "font_size" );
-    var use_excite = localStorage.getItem( "use_excite" );
-    var use_google = localStorage.getItem( "use_google" );
-    var shortcut1 = localStorage.getItem( "shortcut1" );
-    var shortcut2 = localStorage.getItem( "shortcut2" );
+    eval( "var excite = " + localStorage.getItem( "excite" ) );
+    eval( "var google = " + localStorage.getItem( "google" ) );
     var i;
 
+    // font settings.
     if( !font_size ){
         font_size = 13;
     }
@@ -77,31 +80,63 @@ function set()
         }
     }
 
-    if( use_excite == "true" || use_excite == null ){
+    // excite settings.
+    if( excite['use'] == "true" || excite['use'] == null ){
         document.options.use_excite.checked = true;
+        show( "id_excite" );
     }
-    if( use_google == "true" || use_google == null ){
-        document.options.use_google.checked = true;
+    else{
+        hide( "id_excite" );
     }
 
-    if( !shortcut1 && !shortcut2 ){
-        shortcut1 = 'none';
-        shortcut2 = 'Ctrl';
+    if( !excite['sc1'] && !excite['sc2'] ){
+        excite['sc1'] = 'none';
+        excite['sc2'] = 'Ctrl';
     }
-    else if( !shortcut1 ){
-        shortcut1 = 'none';
+    else if( !excite['sc1'] ){
+        excite['sc1'] = 'none';
     }
-    else if( !shortcut2 ){
-        shortcut2 = 'none';
+    else if( !excite['sc2'] ){
+        excite['sc2'] = 'none';
     }
-    for( i = 0; i < document.options.shortcut1.length; i++ ){
-        if( document.options.shortcut1[i].value == shortcut1 ){
-            document.options.shortcut1[i].selected = true;
+    for( i = 0; i < document.options.sc1_excite.length; i++ ){
+        if( document.options.sc1_excite[i].value == excite['sc1'] ){
+            document.options.sc1_excite[i].selected = true;
         }
     }
-    for( i = 0; i < document.options.shortcut2.length; i++ ){
-        if( document.options.shortcut2[i].value == shortcut2 ){
-            document.options.shortcut2[i].selected = true;
+    for( i = 0; i < document.options.sc2_excite.length; i++ ){
+        if( document.options.sc2_excite[i].value == excite['sc2'] ){
+            document.options.sc2_excite[i].selected = true;
+        }
+    }
+
+    // google settings.
+    if( google['use'] == "true" || google['use'] == null ){
+        document.options.use_google.checked = true;
+        show( "id_google" );
+    }
+    else{
+        hide( "id_google" );
+    }
+
+    if( !google['sc1'] && !google['sc2'] ){
+        google['sc1'] = 'none';
+        google['sc2'] = 'Ctrl';
+    }
+    else if( !google['sc1'] ){
+        google['sc1'] = 'none';
+    }
+    else if( !google['sc2'] ){
+        google['sc2'] = 'none';
+    }
+    for( i = 0; i < document.options.sc1_google.length; i++ ){
+        if( document.options.sc1_google[i].value == google['sc1'] ){
+            document.options.sc1_google[i].selected = true;
+        }
+    }
+    for( i = 0; i < document.options.sc2_google.length; i++ ){
+        if( document.options.sc2_google[i].value == google['sc2'] ){
+            document.options.sc2_google[i].selected = true;
         }
     }
 }
@@ -109,16 +144,44 @@ function set()
 function save()
 {
     var font_size = document.options.font_size[document.options.font_size.selectedIndex].value;
-    var use_excite = document.options.use_excite.checked;
-    var use_google = document.options.use_google.checked;
-    var shortcut1 = document.options.shortcut1[document.options.shortcut1.selectedIndex].value;
-    var shortcut2 = document.options.shortcut2[document.options.shortcut2.selectedIndex].value;
+    var excite = {};
+    excite["use"] = document.options.use_excite.checked;
+    excite["sc1"] = document.options.sc1_excite[document.options.sc1_excite.selectedIndex].value;
+    excite["sc2"] = document.options.sc2_excite[document.options.sc2_excite.selectedIndex].value;
+
+    var google = {};
+    google["use"] = document.options.use_google.checked;
+    google["sc1"] = document.options.sc1_google[document.options.sc1_google.selectedIndex].value;
+    google["sc2"] = document.options.sc2_google[document.options.sc2_google.selectedIndex].value;
 
     localStorage.setItem( "font_size", font_size );
-    localStorage.setItem( "use_excite", use_excite );
-    localStorage.setItem( "use_google", use_google );
-    localStorage.setItem( "shortcut1", shortcut1 );
-    localStorage.setItem( "shortcut2", shortcut2 );
+    localStorage.setItem( "excite", toSource( excite ) );
+    localStorage.setItem( "google", toSource( google ) );
+}
+
+function toSource( elm )
+{
+    var out = '';
+    for( var key in elm ){
+        if( out != '' ) out += ',';
+        out += "'"+key+"':'"+elm[key]+"'";
+    }
+    return '{' + out + '}';
+}
+
+function show( id )
+{
+    $("#"+id).show();
+}
+
+function hide( id )
+{
+    $("#"+id).hide();
+}
+
+function slideToggle( id )
+{
+    $("#"+id).slideToggle('fast');
 }
 
 </script>
@@ -130,50 +193,73 @@ function save()
 <form name="options">
     <div class='menu'>
         <div class='title'>Font</div>
+        <div class='contents'>
+            <b>size</b>
+            <select name='font_size'>
+                <option>8</option>
+                <option>9</option>
+                <option>10</option>
+                <option>11</option>
+                <option>12</option>
+                <option>13</option>
+                <option>14</option>
+                <option>15</option>
+                <option>16</option>
+                <option>17</option>
+                <option>18</option>
+                <option>19</option>
+                <option>20</option>
+                <option>21</option>
+                <option>22</option>
+                <option>23</option>
+                <option>24</option>
+            </select>
+            <b>px</b>
+        </div>
         <br>
-        <b>size</b>
-        <select name='font_size'>
-            <option>8</option>
-            <option>9</option>
-            <option>10</option>
-            <option>11</option>
-            <option>12</option>
-            <option>13</option>
-            <option>14</option>
-            <option>15</option>
-            <option>16</option>
-            <option>17</option>
-            <option>18</option>
-            <option>19</option>
-            <option>20</option>
-            <option>21</option>
-            <option>22</option>
-            <option>23</option>
-            <option>24</option>
-        </select>
-        <b>px</b>
-        <br><br>
         <div class='title'>Translator</div>
+        <div class='contents'>
+            <b>Excite</b> <input type='checkbox' name='use_excite' onclick='slideToggle("id_excite");'><br>
+            <div class='contents' id='id_excite'>
+                <b>Shortcut:</b> 
+                <select name='sc1_excite'>
+                    <option>none</option>
+                    <option>Shift</option>
+                    <option>Ctrl</option>
+                    <option>Alt</option>
+                </select>
+                <b>+</b>
+                <select name='sc2_excite'>
+                    <option>none</option>
+                    <option>Shift</option>
+                    <option>Ctrl</option>
+                    <option>Alt</option>
+                </select>
+                <b>+ Select</b>
+                <br>
+            </div>
+            <br>
+            <b>Google</b> <input type='checkbox' name='use_google' onclick='slideToggle("id_google");'><br>
+            <div class='contents' id='id_google'>
+                <b>Shortcut:</b> 
+                <select name='sc1_google'>
+                    <option>none</option>
+                    <option>Shift</option>
+                    <option>Ctrl</option>
+                    <option>Alt</option>
+                </select>
+                <b>+</b>
+                <select name='sc2_google'>
+                    <option>none</option>
+                    <option>Shift</option>
+                    <option>Ctrl</option>
+                    <option>Alt</option>
+                </select>
+                <b>+ Select</b>
+                <br>
+            </div>
+        </div>
         <br>
-        <input type='checkbox' name='use_excite'> <b>Excite</b><br>
-        <input type='checkbox' name='use_google'> <b>Google</b>
-        <br><br>
-        <div class='title'>Shortcut</div>
-        <br>
-        <select name='shortcut1'>
-            <option>none</option>
-            <option>Shift</option>
-            <option>Ctrl</option>
-            <option>Alt</option>
-        </select>
-        <b>+</b>
-        <select name='shortcut2'>
-            <option>none</option>
-            <option>Shift</option>
-            <option>Ctrl</option>
-            <option>Alt</option>
-        </select>
-        <b>+ Select</b>
         <!--
         <br><br>
         <div class='title'>Setting Details</div>

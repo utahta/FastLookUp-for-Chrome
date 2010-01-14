@@ -223,7 +223,17 @@ window.System = {
     txt: "",
     msgid_list: [],
     index: 0,
-    
+ 
+    clear: function()
+    {
+        System.msgid_list = [];
+    },
+
+    length: function()
+    {
+        return System.msgid_list.length;
+    },
+
     push: function( msgid )
     {
         System.msgid_list.push( msgid );
@@ -245,39 +255,55 @@ window.System = {
             var txt = System.txt;
             Connection.postMessage( {msgid:msgid, txt:txt} );
         }
+    },
+
+    chooseTranslator: function( ev )
+    {
+        // System setting.
+        System.clear();
+
+        //System.push( "alc" ); // alc. プラグインとして利用すると規約違反らしいので無効化
+        
+        // excite.
+        if( Options.excite["use"] && ev.ctrlKey == Options.excite["ctrl_key"] && ev.shiftKey == Options.excite["shift_key"] && ev.altKey == Options.excite["alt_key"] ){
+            System.push( "excite_pre" );
+        }
+
+        // google.
+        if( Options.google["use"] && ev.ctrlKey == Options.google["ctrl_key"] && ev.shiftKey == Options.google["shift_key"] && ev.altKey == Options.google["alt_key"] ){
+            System.push( "google" );
+        }
+        return System.length();
     }
 }
 
 window.Options = {
     font_size: 13,
-    shift_key: false,
-    ctrl_key: false,
-    alt_key: false,
+    excite: {},
+    google: {},
 
-    set: function( arg ) 
+    set: function( arg )
     {
         Options.font_size = arg.font_size;
+        
+        // excite settings.
+        eval( "var excite = " + arg.excite );
+     
+        Options.excite["use"] = excite["use"] == "true" ? true : false;
+        Options.excite["shift_key"] = (excite["sc1"] == "Shift" || excite["sc2"] == "Shift") ? true : false;
+        Options.excite["ctrl_key"] = (excite["sc1"] == "Ctrl" || excite["sc2"] == "Ctrl") ? true : false;
+        Options.excite["alt_key"] = (excite["sc1"] == "Alt" || excite["sc2"] == "Alt") ? true : false;
 
-        // System setting.
-        //System.push( "alc" );         // alc. プラグインとして利用すると規約違反らしいので無効化
-        if( arg.use_excite == "true" ){
-            System.push( "excite_pre" );    // excite.
-        }
-        if( arg.use_google == "true" ){
-            System.push( "google" );        // google.
-        }
+        // google settings.
+        eval( "var google = " + arg.google );
 
-        if( arg.shortcut1 == "Shift" || arg.shortcut2 == "Shift" ){
-            Options.shift_key = true;
-        }
-        if( arg.shortcut1 == "Ctrl" || arg.shortcut2 == "Ctrl" ){
-            Options.ctrl_key = true;
-        }
-        if( arg.shortcut1 == "Alt" || arg.shortcut2 == "Alt" ){
-            Options.alt_key = true;
-        }
+        Options.google["use"] = google["use"] == "true" ? true : false;
+        Options.google["shift_key"] = (google["sc1"] == "Shift" || google["sc2"] == "Shift") ? true : false;
+        Options.google["ctrl_key"] = (google["sc1"] == "Ctrl" || google["sc2"] == "Ctrl") ? true : false;
+        Options.google["alt_key"] = (google["sc1"] == "Alt" || google["sc2"] == "Alt") ? true : false;
     }
 }
+
 
 window.Receiver = {
     message: function( arg )
@@ -341,11 +367,6 @@ function checkId( ev )
     return false;
 }
 
-function checkKeys( ev )
-{
-    return ev.ctrlKey == Options.ctrl_key && ev.shiftKey == Options.shift_key && ev.altKey == Options.alt_key;
-}
-
 function addStyle()
 {
     var s = document.createElement( "style" );
@@ -369,7 +390,7 @@ Connection.postMessage( {msgid:"options"} );
 document.addEventListener( "mouseup", function( ev ){
     if( !checkId( ev ) ){
         var txt = window.getSelection().toString();
-        if( !txt || txt.match(/^\s+$/) || !checkKeys( ev ) ){
+        if( !txt || txt.match(/^\s+$/) || !System.chooseTranslator( ev ) ){
             return;
         }
         MousePos.set( ev );
