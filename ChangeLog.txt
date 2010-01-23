@@ -1,2 +1,5 @@
+v0.1.6.1
+	bug fix.
+
 v0.1.6.0
-	You can have different shortcuts to choose between Excite/Google.
+	choose different shortcuts between Excite/Google.

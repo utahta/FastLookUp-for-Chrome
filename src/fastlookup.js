@@ -58,15 +58,16 @@ window.Parser = {
         }
         
         for( var i = 0; i < r.snapshotLength; i++ ){
+            var e = r.snapshotItem(i);
             try{
                 // <a>タグはポップアップ表示に変換します
-                var e = r.snapshotItem(i);
                 e.innerHTML = e.innerHTML.replace( /<a/g, "<a onclick='window.open(this.href, \"fastlookpop\", \"menubar=no, toolbar=no\"); return false;'" );
                 res.push( e );
             }
             catch(e){
-                res.push( r.snapshotItem(i) );
             }
+            e.setAttribute( "class", "" );
+            res.push( e );
         }
         //res.push( Utility.createTag( "excite翻訳", "http://www.excite.co.jp/world/" ) );
         return res;
@@ -131,27 +132,7 @@ window.PopUp = {
     {
         PopUp.remove();
         PopUp.obj = document.createElement( "div" );
-        var style = ['position: absolute',
-                    'border: 1px solid #000',
-                    'background: #fff',
-                    'width: auto',
-                    'height: auto',
-                    'max-height: 50%',
-                    'color: #000',
-                    'font-size: '+Options.font_size+'px',
-                    'font-style: normal',
-                    'font-variant: normal',
-                    'font-weight: normal',
-                    'text-align: left',
-                    'padding:7px 7px 7px 7px',
-                    'margin:0 0 0 0',
-                    'z-index: 9998',
-                    '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
-                    '-webkit-border-radius: 7px',
-                    'overflow: auto',
-                    'opacity: .95'];
-        PopUp.obj.setAttribute( "style", style.join(";") );
-        PopUp.obj.setAttribute( "id", "fastlookup" );
+        PopUp.obj.setAttribute( "id", "fastlookup_top" );
     },
 
     remove: function()
@@ -177,9 +158,14 @@ window.PopUp = {
         }
         else{
             PopUp.initialize();
+            
+            var o = document.createElement( "div" );
+            o.setAttribute( "id", "fastlookup" );
             res.forEach( function( e ){
-                PopUp.obj.appendChild( e );
+                o.appendChild( e );
             });
+            PopUp.obj.appendChild( o );
+           
             document.body.appendChild( PopUp.obj );
             PopUp.position();
         }
@@ -191,7 +177,6 @@ window.PopUp = {
         var e = document.createElement( "div" );
         var i = document.createElement( "img" );
         i.src = loading_img_url;
-        i.setAttribute( "class", "fastlookup_img" );
         var t = document.createTextNode( " 検索中..." );
         e.appendChild( i );
         e.appendChild( t );
@@ -369,8 +354,34 @@ function checkId( ev )
 
 function addStyle()
 {
+    var style;
+
+    style = ['position: absolute'];
+    var fastlookup_top_css = "#fastlookup_top{" + style.join(";") + "}";
+    
+    style = ['border: 1px solid #000',
+             'background: #fff',
+             'display: block',
+             'width: auto',
+             'height: auto',
+             'max-height: 50%',
+             'color: #000',
+             'font-size: '+Options.font_size+'px',
+             'font-style: normal',
+             'font-variant: normal',
+             'font-weight: normal',
+             'text-align: left',
+             'padding:7px 7px 7px 7px',
+             'margin:0 0 0 0',
+             'z-index: 9998',
+             '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
+             '-webkit-border-radius: 7px',
+             'overflow: auto',
+             'opacity: .95'];
+    var fastlookup_css = "#fastlookup{" + style.join(";") + "}";
+    
     var s = document.createElement( "style" );
-    var sc = document.createTextNode( "#fastlookup{color:#000;} #fastlookup img{padding:0; margin:0; display:inline;} #fastlookup a{color:#000;}" );
+    var sc = document.createTextNode( fastlookup_top_css + fastlookup_css + " #fastlookup img{padding:0; margin:0; display:inline;} #fastlookup a{color:#000;}" );
     s.type = "text/css";
     s.appendChild( sc );
     document.getElementsByTagName( "head" )[0].appendChild( s )
