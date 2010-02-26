@@ -61,6 +61,10 @@ body {
 .buttons {
     width: 100px;
 }
+#save_result {
+    display: none;
+    color: #33e;
+}
 </style>
 <script>
 function set()
@@ -157,6 +161,8 @@ function save()
     localStorage.setItem( "font_size", font_size );
     localStorage.setItem( "excite", toSource( excite ) );
     localStorage.setItem( "google", toSource( google ) );
+    slideToggle( "save_result", 'normal' );
+    fadeOutToggle( "save_result", 2000 );
 }
 
 function toSource( elm )
@@ -179,9 +185,16 @@ function hide( id )
     $("#"+id).hide();
 }
 
-function slideToggle( id )
+function slideToggle( id, arg )
 {
-    $("#"+id).slideToggle('fast');
+    if( arg == undefined ) arg = "fast";
+    $("#"+id).slideToggle(arg);
+}
+
+function fadeOutToggle( id, arg )
+{
+    if( arg == undefined ) arg = "fast";
+    $("#"+id).fadeOut(arg)
 }
 
 </script>
@@ -268,9 +281,10 @@ function slideToggle( id )
         -->
     </div>
     <br>
-    <input type='button' class='buttons' name='apply' value='Apply' onclick='save()'>
-    <input type='button' class='buttons' name='exit' value='Exit' onclick='window.close()'>
+    <input type='button' class='buttons' name='save_btn' value='Save' onclick='save()'>
+    <input type='button' class='buttons' name='exit_btn' value='Exit' onclick='window.close()'>
 </form>
+<div id='save_result'>saved</div>
 <div class="footer"><a href='http://www.ninxit.com/blog/' target=_blank>home</a> | <a href='http://github.com/yuta/FastLookUp-for-Chrome' target=_blank>repos</a> | <a href='http://github.com/yuta/FastLookUp-for-Chrome/commits/master/' target=_blank>history</a></div>
 </center>
 </body>

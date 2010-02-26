@@ -356,7 +356,8 @@ function addStyle()
 {
     var style;
 
-    style = ['position: absolute'];
+    style = ['position: absolute',
+             'z-index: 9998'];
     var fastlookup_top_css = "#fastlookup_top{" + style.join(";") + "}";
     
     style = ['border: 1px solid #000',
