@@ -83,7 +83,13 @@ window.Options = {
             google['sc1'] = 'none';
             google['sc2'] = 'Ctrl';
             localStorage.setItem( "google", toSource( google ) );
-        }        
+        }
+
+        var check_1st = localStorage.getItem( "check_1st" );
+        if( check_1st == null ){
+            chrome.tabs.create( {url:"options.html"})
+            localStorage.setItem( "check_1st", "true" );
+        }
     },
     
     load: function()

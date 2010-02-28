@@ -295,6 +295,7 @@ window.Receiver = {
     {
         if( arg.msgid == "options" ){
             Options.set( arg );
+            addStyle(); // after options loaded.
         }
         else if( arg.msgid == "alc" ){
             var res = Parser.alc( arg.txt );
@@ -357,6 +358,10 @@ function addStyle()
     var style;
 
     style = ['position: absolute',
+             'max-height: 50%',
+             '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
+             '-webkit-border-radius: 7px',
+             'overflow: auto',
              'z-index: 9998'];
     var fastlookup_top_css = "#fastlookup_top{" + style.join(";") + "}";
     
@@ -390,10 +395,7 @@ function addStyle()
 
 // --- main ---
 
-// Add style.
-addStyle();
-
-// Load options.
+// Load options & add style.
 Connection = chrome.extension.connect( {name:"fastlookup"} );
 Connection.onMessage.addListener( Receiver.message );
 Connection.postMessage( {msgid:"options"} );

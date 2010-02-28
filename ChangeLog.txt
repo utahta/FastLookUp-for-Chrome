@@ -1,3 +1,6 @@
+v0.1.6.3
+	bug fix. enabled font_size option.
+
 v0.1.6.2
 	bug fix. add z-index:9998;
 
