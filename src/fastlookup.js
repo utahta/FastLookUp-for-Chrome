@@ -8,7 +8,7 @@ window.Utility = {
         e.innerHTML = "by <a href='"+url+"' onclick='window.open(this.href, \"fastlookpop\"); return false;'>"+txt+"</a>";
         return e;
     }
-}
+};
 
 window.Parser = {
     alc: function( txt )
@@ -97,7 +97,7 @@ window.Parser = {
             var o = e.ownerDocument == null ? e.documentElement : e.ownerDocument.documentElement;
             var r = document.createNSResolver(o)(prefix);
             return r ? r : (document.contentType == "text/html") ? "" : "http://www.w3.org/1999/xhtml";
-        }
+        };
         try{
             var exp = document.createExpression( exp, resolver );
             var r = exp.evaluate( e, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
@@ -107,7 +107,7 @@ window.Parser = {
         }
         return r;
     }
-}
+};
 
 window.MousePos = {
     x: 0,
@@ -123,7 +123,7 @@ window.MousePos = {
     {
         alert( "x:"+MousePos.x+" y:"+MousePos.y );
     }
-}
+};
 
 window.PopUp = {
     obj: null,
@@ -134,10 +134,18 @@ window.PopUp = {
         PopUp.obj = document.createElement( "div" );
         PopUp.obj.setAttribute( "id", "fastlookup_top" );
     },
+    
+    exist: function()
+    {
+        if( !PopUp.obj ){
+        	return false;
+        }
+        return true;
+    },
 
     remove: function()
     {
-        if( !PopUp.obj ){
+        if( !PopUp.exist() ){
             return;
         }
         PopUp.obj.parentNode.removeChild( PopUp.obj );
@@ -202,7 +210,7 @@ window.PopUp = {
         res.push( e );
         PopUp.show( res );
     }
-}
+};
 
 window.System = {
     txt: "",
@@ -242,30 +250,51 @@ window.System = {
         }
     },
 
-    chooseTranslator: function( ev )
+    /**
+     * @brief 翻訳機を選択
+     * @param ev イベントオブジェクト
+     * @param is_word 単語単体だったら true.
+     */
+    chooseTranslator: function( ev, is_word )
     {
         // System setting.
         System.clear();
-
-        //System.push( "alc" ); // alc. プラグインとして利用すると規約違反らしいので無効化
         
-        // excite.
+        // 最適化有効？
+        if( Options.optimum ){
+        	// 有効なら単語単体の場合のみ excite を使用。
+        	if( is_word ){
+        		System.tryExciteTranslator( ev );
+        	}
+        	System.tryGoogleTranslator( ev );
+        }
+        else{
+        	System.tryExciteTranslator( ev );
+        	System.tryGoogleTranslator( ev );
+        }
+        return System.length();
+    },
+    
+    // excite.
+    tryExciteTranslator: function( ev ){
         if( Options.excite["use"] && ev.ctrlKey == Options.excite["ctrl_key"] && ev.shiftKey == Options.excite["shift_key"] && ev.altKey == Options.excite["alt_key"] ){
             System.push( "excite_pre" );
         }
-
-        // google.
+    },
+    
+    // google.
+    tryGoogleTranslator: function( ev ){
         if( Options.google["use"] && ev.ctrlKey == Options.google["ctrl_key"] && ev.shiftKey == Options.google["shift_key"] && ev.altKey == Options.google["alt_key"] ){
             System.push( "google" );
         }
-        return System.length();
     }
-}
+};
 
 window.Options = {
     font_size: 13,
     excite: {},
     google: {},
+    optimum: false,
 
     set: function( arg )
     {
@@ -286,8 +315,40 @@ window.Options = {
         Options.google["shift_key"] = (google["sc1"] == "Shift" || google["sc2"] == "Shift") ? true : false;
         Options.google["ctrl_key"] = (google["sc1"] == "Ctrl" || google["sc2"] == "Ctrl") ? true : false;
         Options.google["alt_key"] = (google["sc1"] == "Alt" || google["sc2"] == "Alt") ? true : false;
+        
+        // check short cut key
+        var check_scs = [];
+        if( Options.excite["use"] == true ) check_scs.push( Options.excite );
+        if( Options.google["use"] == true ) check_scs.push( Options.google );
+    	// 同一ショートカットが２つ以上だったら最適化有効
+    	if( Options._countSameShortcut( check_scs ) >= 2 ){
+    		Options.optimum = true;
+    	}
+    },
+    
+    // like private function.
+    _countSameShortcut: function( scs )
+    {
+    	var sctmp = null;
+    	var count = 0;
+    	for( var i = 0; i < scs.length; i++ ){
+    		var sc = scs[i];
+    		if( sctmp == null ){
+    			sctmp = {};
+    			sctmp["shift_key"] = sc["shift_key"];
+    			sctmp["ctrl_key"] = sc["ctrl_key"];
+    			sctmp["alt_key"] = sc["alt_key"];
+    		}
+    		else{
+    			if( sctmp["shift_key"] != sc["shift_key"] ) continue;
+    			if( sctmp["ctrl_key"] != sc["ctrl_key"] ) continue;
+    			if( sctmp["alt_key"] != sc["alt_key"] ) continue;
+    		}
+    		count++;
+    	}
+    	return count;
     }
-}
+};
 
 
 window.Receiver = {
@@ -339,7 +400,7 @@ window.Receiver = {
             PopUp.error( arg.errno );
         }
    }
-}
+};
 
 function checkId( ev )
 {
@@ -390,7 +451,7 @@ function addStyle()
     var sc = document.createTextNode( fastlookup_top_css + fastlookup_css + " #fastlookup img{padding:0; margin:0; display:inline;} #fastlookup a{color:#000;}" );
     s.type = "text/css";
     s.appendChild( sc );
-    document.getElementsByTagName( "head" )[0].appendChild( s )
+    document.getElementsByTagName( "head" )[0].appendChild( s );
 }
 
 // --- main ---
@@ -404,7 +465,8 @@ Connection.postMessage( {msgid:"options"} );
 document.addEventListener( "mouseup", function( ev ){
     if( !checkId( ev ) ){
         var txt = window.getSelection().toString();
-        if( !txt || txt.match(/^\s+$/) || !System.chooseTranslator( ev ) ){
+        // 空文字、空白のみ、ショートカット未選択だったら何もしない
+        if( !txt || txt.match(/^\s+$/) || !System.chooseTranslator( ev, (txt.match(/^(\s|)\S+(\s|)$/) != null) ) ){
             return;
         }
         MousePos.set( ev );
@@ -417,9 +479,12 @@ document.addEventListener( "mouseup", function( ev ){
     }
 }, false );
 
-document.addEventListener( "click", function( ev ){
+document.addEventListener( "mousedown", function( ev ){
     if( !checkId( ev ) ){
-        PopUp.remove();
+    	if( PopUp.exist() ){
+    		window.getSelection().removeAllRanges();
+    		PopUp.remove();
+    	}
     }
 }, false );
 

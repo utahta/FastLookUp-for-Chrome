@@ -1,3 +1,6 @@
+v0.1.6.4
+    implement optimization.
+
 v0.1.6.3
 	bug fix. enabled font_size option.
 
