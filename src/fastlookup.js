@@ -150,7 +150,7 @@ PopUp = {
     exist: function()
     {
         if( !PopUp.obj ){
-        	return false;
+            return false;
         }
         return true;
     },
@@ -241,21 +241,21 @@ System = {
 
     push: function( msgid )
     {
-    	this.msgid_list.push( msgid );
+        this.msgid_list.push( msgid );
     },
 
     initialize: function( txt )
     {
-    	this.index = 0;
-    	this.txt = txt;
+        this.index = 0;
+        this.txt = txt;
     },
 
     translation: function()
     {
-    	if( this.length() == 0 ){
-    		return;
-    	}
-    	
+        if( this.length() == 0 ){
+            return;
+        }
+        
         if( this.length() <= this.index ){
             PopUp.notFound();
         }
@@ -277,15 +277,15 @@ System = {
         
         // 最適化有効？
         if( Options.get('optimum') ){
-        	// 有効なら単語単体の場合のみ excite を使用。
-        	if( is_word ){
-        		this.tryExciteTranslator( ev );
-        	}
-        	this.tryGoogleTranslator( ev );
+            // 有効なら単語単体の場合のみ excite を使用。
+            if( is_word ){
+                this.tryExciteTranslator( ev );
+            }
+            this.tryGoogleTranslator( ev );
         }
         else{
-        	this.tryExciteTranslator( ev );
-        	this.tryGoogleTranslator( ev );
+            this.tryExciteTranslator( ev );
+            this.tryGoogleTranslator( ev );
         }
         return this.length();
     },
@@ -293,7 +293,7 @@ System = {
     // excite.
     tryExciteTranslator: function( ev ){
         if( Options.get('excite')["use"] && 
-        	ev.ctrlKey == Options.get('excite')["ctrl_key"] && ev.shiftKey == Options.get('excite')["shift_key"] && ev.altKey == Options.get('excite')["alt_key"] ){
+            ev.ctrlKey == Options.get('excite')["ctrl_key"] && ev.shiftKey == Options.get('excite')["shift_key"] && ev.altKey == Options.get('excite')["alt_key"] ){
             this.push( "excite_pre" );
         }
     },
@@ -301,23 +301,23 @@ System = {
     // google.
     tryGoogleTranslator: function( ev ){
         if( Options.get('google')["use"] && 
-        	ev.ctrlKey == Options.get('google')["ctrl_key"] && ev.shiftKey == Options.get('google')["shift_key"] && ev.altKey == Options.get('google')["alt_key"] ){
-        	this.push( "google" );
+            ev.ctrlKey == Options.get('google')["ctrl_key"] && ev.shiftKey == Options.get('google')["shift_key"] && ev.altKey == Options.get('google')["alt_key"] ){
+            this.push( "google" );
         }
     }
 };
 
 Options = {
-	options_data: {},
+    options_data: {},
 
     load: function( arg )
     {
-    	this.options_data = JSON.parse( arg.options_data );
+        this.options_data = JSON.parse( arg.options_data );
     },
     
     get: function(key)
     {
-    	return this.options_data[key];
+        return this.options_data[key];
     }
 };
 
@@ -373,89 +373,89 @@ Receiver = {
 };
 
 Style = {
-	css: null,
-	text_node: null,
-		
-	/**
-	 * @brief スタイル追加
-	 */
-	add: function()
-	{
-	    Style.css = document.createElement( "style" );
-	    Style.text_node = document.createTextNode( Style._getStyle() );
-	    Style.css.type = "text/css";
-	    Style.css.appendChild( Style.text_node );
-	    document.getElementsByTagName( "head" )[0].appendChild( Style.css );
-	},
+    css: null,
+    text_node: null,
+        
+    /**
+     * @brief スタイル追加
+     */
+    add: function()
+    {
+        Style.css = document.createElement( "style" );
+        Style.text_node = document.createTextNode( Style._getStyle() );
+        Style.css.type = "text/css";
+        Style.css.appendChild( Style.text_node );
+        document.getElementsByTagName( "head" )[0].appendChild( Style.css );
+    },
 
-	/**
-	 * @brief スタイル更新
-	 */
-	update: function()
-	{
-		if( Style.css == null ){
-			Style.add();
-			return;
-		}
-		
-		if( Style.text_node != null ){
-			Style.css.removeChild( Style.text_node );
-		}
-		Style.text_node = document.createTextNode( Style._getStyle() );
-	    Style.css.appendChild( Style.text_node );
-	},
+    /**
+     * @brief スタイル更新
+     */
+    update: function()
+    {
+        if( Style.css == null ){
+            Style.add();
+            return;
+        }
+        
+        if( Style.text_node != null ){
+            Style.css.removeChild( Style.text_node );
+        }
+        Style.text_node = document.createTextNode( Style._getStyle() );
+        Style.css.appendChild( Style.text_node );
+    },
 
-	/**
-	 * @brief スタイル文字列取得
-	 * @note
-	 * like private method.
-	 */
-	_getStyle: function()
-	{
-	    var style;
-	    style = ['position: absolute',
-	             'max-width: 70%',
-	             'max-height: 50%',
-	             '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
-	             '-webkit-border-radius: 7px',
-	             'padding:0',
-	             'margin:0',
-	             'overflow: auto',
-	             'z-index: 9998'];
-	    var fastlookup_top_css = "#fastlookup_top{" + style.join(";") + "}";
-	    
-	    style = ['border: 1px solid #000',
-	             'background: ' + Options.get('background_color'),
-	             'color: ' + Options.get('font_color'),
-	             'font-family:'+ Options.get('font_family'),
-	             'font-size: '+ Options.get('font_size') +'px',
-	             'font-style: ' + Options.get('font_style'),
-	             'opacity: ' + Options.get('opacity'),
-	             'font-variant: normal',
-	             'font-weight: normal',
-	             'display: block',
-	             'width: auto',
-	             'height: auto',
-	             'text-align: left',
-	             'padding:7px 7px 7px 7px',
-	             'margin:0',
-	             'z-index: 9998',
-	             '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
-	             '-webkit-border-radius: 7px',
-	             'overflow: auto'];
-	    var fastlookup_css = "#fastlookup{" + style.join(";") + "}";
-	    
-	    var other_css = "#fastlookup img{padding:0; margin:0; display:inline; border:0; clear:both;}" +
-						"#fastlookup a{color:#000; margin:0; padding:0;}" +
-						"#fastlookup p{margin:5px; padding:0;}";
-	    return fastlookup_top_css + fastlookup_css + other_css;
-	}
+    /**
+     * @brief スタイル文字列取得
+     * @note
+     * like private method.
+     */
+    _getStyle: function()
+    {
+        var style;
+        style = ['position: absolute',
+                 'max-width: 70%',
+                 'max-height: 50%',
+                 '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
+                 '-webkit-border-radius: 7px',
+                 'padding:0',
+                 'margin:0',
+                 'overflow: auto',
+                 'z-index: 9998'];
+        var fastlookup_top_css = "#fastlookup_top{" + style.join(";") + "}";
+        
+        style = ['border: 1px solid #000',
+                 'background: ' + Options.get('background_color'),
+                 'color: ' + Options.get('font_color'),
+                 'font-family:'+ Options.get('font_family'),
+                 'font-size: '+ Options.get('font_size') +'px',
+                 'font-style: ' + Options.get('font_style'),
+                 'opacity: ' + Options.get('opacity'),
+                 'font-variant: normal',
+                 'font-weight: normal',
+                 'display: block',
+                 'width: auto',
+                 'height: auto',
+                 'text-align: left',
+                 'padding:7px 7px 7px 7px',
+                 'margin:0',
+                 'z-index: 9998',
+                 '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
+                 '-webkit-border-radius: 7px',
+                 'overflow: auto'];
+        var fastlookup_css = "#fastlookup{" + style.join(";") + "}";
+        
+        var other_css = "#fastlookup img{padding:0; margin:0; display:inline; border:0; clear:both;}" +
+                        "#fastlookup a{color:#000; margin:0; padding:0;}" +
+                        "#fastlookup p{margin:5px; padding:0;}";
+        return fastlookup_top_css + fastlookup_css + other_css;
+    }
 };
 
 // --- main ---
 Style.add();
 
-// Load options.
+// Connection & Load options.
 Connection = chrome.extension.connect( {name:"fastlookup"} );
 Connection.onMessage.addListener( Receiver.message );
 Connection.postMessage( {msgid:"options"} );
@@ -470,9 +470,6 @@ document.addEventListener( "mouseup", function( ev ){
         }
         MousePos.set( ev );
 
-        Connection = chrome.extension.connect( {name:"fastlookup"} );
-        Connection.onMessage.addListener( Receiver.message );
-
         System.initialize( txt );
         System.translation();
     }
@@ -480,11 +477,11 @@ document.addEventListener( "mouseup", function( ev ){
 
 document.addEventListener( "mousedown", function( ev ){
     if( !Utility.checkId( ev ) ){
-    	if( PopUp.exist() ){
-    		window.getSelection().removeAllRanges();
-    		PopUp.remove();
-    	}
-    	System.clear();
+        if( PopUp.exist() ){
+            window.getSelection().removeAllRanges();
+            PopUp.remove();
+        }
+        System.clear();
     }
 }, false );
 
