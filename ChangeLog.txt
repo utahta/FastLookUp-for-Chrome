@@ -1,14 +1,24 @@
+v0.1.7
+    add options.(background-color, font-color, font-family, font-style, opacity)
+    when you saved options, application notifies it to all contents-script.
+    オプションの項目を追加。(background-color, font-color, font-family, font-style, opacity)
+    オプション保存時、更新通知を行うように変更。
+
 v0.1.6.4
-    implement optimization.
+    implement easy optimization.
+    簡単な最適化処理を実装。
 
 v0.1.6.3
 	bug fix. enabled font_size option.
+	フォントサイズの変更が出来てなかったバグを修正。
 
 v0.1.6.2
 	bug fix. add z-index:9998;
+	z-indexの値を修正。
 
 v0.1.6.1
 	bug fix.
 
 v0.1.6.0
 	choose different shortcuts between Excite/Google.
+	翻訳機ごとにショートカットを選択できるように変更。

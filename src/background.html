@@ -2,22 +2,22 @@
 <head>
 <script type='text/javascript' src='http://www.google.com/jsapi'></script>    
 <script>
-window.Connection = null;
-window.Request = {
+Connection = null;
+Request = {
     alc: function( txt )
     {
-        Request.send( "alc", "http://eow.alc.co.jp/"+txt+"/" );
+        this.send( "alc", "http://eow.alc.co.jp/"+txt+"/" );
     },
 
     excite_pre: function( txt )
     {
         txt = EscapeUTF8( txt );
-        Request.send( "excite_pre", "http://www.excite.co.jp/dictionary/english_japanese/?search="+txt+"&match=exact&dictionary=NEW_EJJE" );
+        this.send( "excite_pre", "http://www.excite.co.jp/dictionary/english_japanese/?search="+txt+"&match=exact&dictionary=NEW_EJJE" );
     },
 
     excite: function( txt )
     {
-        Request.send( "excite", "http://www.excite.co.jp"+txt );
+        this.send( "excite", "http://www.excite.co.jp"+txt );
     },
 
     google: function( txt )
@@ -58,57 +58,139 @@ window.Request = {
     }
 }
 
-window.Options = {
+Options = {
+    default_data:{
+	    background_color: '#ffffff',
+	    font_color: '#000000',
+        font_size: 13,
+	    font_family: "Arial, Helvetica, sans-serif",
+	    font_style: "normal",
+	    opacity: 1.0,
+	    excite:{
+            use:'true',
+            sc1:'none',
+            sc2:'Ctrl',
+            shift_key: false,
+            ctrl_key: true,
+            alt_key: false
+        },
+	    google:{
+            use:'true',
+            sc1:'none',
+            sc2:'Ctrl',
+            shift_key: false,
+            ctrl_key: true,
+            alt_key: false
+    	}
+    },
+    options_data: null,
+	
     check: function()
     {
-        var font_size = localStorage.getItem( "font_size" );
-        eval( "var excite = " + localStorage.getItem( "excite" ) );
-        eval( "var google = " + localStorage.getItem( "google" ) );
-        
-        if( font_size == null ){
-            localStorage.setItem( "font_size", 13 );
-        }
-
-        if( excite == null ){
-            excite = {}
-            excite['use'] = 'true';
-            excite['sc1'] = 'none';
-            excite['sc2'] = 'Ctrl';
-            localStorage.setItem( "excite", toSource( excite ) );
-        }
-
-        if( google == null ){
-            google = {}
-            google['use'] = 'true';
-            google['sc1'] = 'none';
-            google['sc2'] = 'Ctrl';
-            localStorage.setItem( "google", toSource( google ) );
-        }
-
-        var check_1st = localStorage.getItem( "check_1st" );
-        if( check_1st == null ){
-            chrome.tabs.create( {url:"options.html"})
-            localStorage.setItem( "check_1st", "true" );
+        var options = localStorage.getItem( "options" );
+        if( options == null ){
+            chrome.tabs.create( {url:"options.html"} );
+            this.options_data = this.default_data;
+            this.save();
         }
     },
     
-    load: function()
+    load: function( force_default )
     {
-        var font_size = localStorage.getItem( "font_size" );
-        var excite = localStorage.getItem( "excite" );
-        var google = localStorage.getItem( "google" );
-        Connection.postMessage( {msgid:"options", 
-                                 font_size:font_size, 
-                                 excite:excite,
-                                 google:google} );
-    }
-}
+        if( force_default == true ){
+            this.options_data = this.default_data;
+            return;
+        }
+        var options_txt = localStorage.getItem( "options" );
+        this.options_data = this.default_data;
+        if( options_txt ){
+	        try{
+	        	this.options_data = JSON.parse( options_txt );
+	        }
+	        catch(e){
+	        }
+        }
+    },
 
-window.Receiver = {
+    save: function()
+    {
+        var translator_list = ['excite', 'google'];
+        var sc_list = ['sc1', 'sc2'];
+        // ショートカットキー要素調査
+        for( var i = 0; i < translator_list.length; i++ ){
+            var key = translator_list[i];
+            this.options_data[key].shift_key = false;
+            this.options_data[key].ctrl_key = false;
+            this.options_data[key].alt_key = false;
+
+            for( var j = 0; j < sc_list.length; j++ ){
+                var sc = sc_list[j];
+            	if( this.options_data[key][sc] == "Shift" ) this.options_data[key].shift_key = true;
+                if( this.options_data[key][sc] == "Ctrl" ) this.options_data[key].ctrl_key = true;
+                if( this.options_data[key][sc] == "Alt" ) this.options_data[key].alt_key = true;
+            }
+        }
+
+        // 最適化調査
+        var check_scs = [];
+        for( var i = 0; i < translator_list.length; i++ ){
+        	var key = translator_list[i];
+            if( this.options_data[key]["use"] == true ) check_scs.push( this.options_data[key] );
+        }
+        // 同一ショートカットが２つ以上だったら最適化有効
+        this.options_data.optimum = (this._countSameShortcut( check_scs ) >= 2) ? true : false;
+
+        // 保存
+        localStorage.setItem( "options", JSON.stringify(this.options_data) );
+    },
+
+    // like private function.
+    _countSameShortcut: function( scs )
+    {
+        var sctmp = null;
+        var count = 0;
+        for( var i = 0; i < scs.length; i++ ){
+            var sc = scs[i];
+            if( sctmp == null ){
+                sctmp = {};
+                sctmp["shift_key"] = sc["shift_key"];
+                sctmp["ctrl_key"] = sc["ctrl_key"];
+                sctmp["alt_key"] = sc["alt_key"];
+            }
+            else{
+                if( sctmp["shift_key"] != sc["shift_key"] ) continue;
+                if( sctmp["ctrl_key"] != sc["ctrl_key"] ) continue;
+                if( sctmp["alt_key"] != sc["alt_key"] ) continue;
+            }
+            count++;
+        }
+        return count;
+    },
+
+    set: function(key, value)
+    {
+        this.options_data[key] = value;
+    },
+    
+    get: function(key)
+    {
+        return this.options_data[key];
+    },
+
+    notify: function()
+    {
+        this.load();
+        if( Connection != null ){
+            Connection.postMessage( {msgid:"options", options_data:JSON.stringify(this.options_data)} );
+        }
+    }
+};
+
+Receiver = {
     message: function( arg )
     {
         if( arg.msgid == "options" ){
-            Options.load();
+            Options.notify();
         }
         else if( arg.msgid == "alc" ){
             Request.alc( arg.txt );
@@ -134,17 +216,6 @@ chrome.extension.onConnect.addListener( function onPortConnect( con ){
     Connection = con;
     Connection.onMessage.addListener( Receiver.message );
 });
-
-// see options.html
-function toSource( elm )
-{
-    var out = '';
-    for( var key in elm ){
-        if( out != '' ) out += ',';
-        out += "'"+key+"':'"+elm[key]+"'";
-    }
-    return '{' + out + '}';
-}
 
 // ecl.js
 // http://nurucom-archives.hp.infoseek.co.jp/digital/escape-codec-library.html

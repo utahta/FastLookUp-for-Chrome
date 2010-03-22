@@ -1,6 +1,6 @@
 {
     "name": "FastLookUp for Chrome",
-    "version": "0.1.6.4",
+    "version": "0.1.7",
     "description": "A translator extension for chrome.",
     "options_page": "options.html",
     "background_page": "background.html",

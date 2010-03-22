@@ -1,16 +1,28 @@
 var loading_img_url = chrome.extension.getURL("loadinfo.gif");
 
-window.Connection = null; // chrome connection.
-window.Utility = {
+Connection = null; // chrome connection.
+Utility = {
     createTag: function( txt, url )
     {
         var e = document.createElement( "div" );
         e.innerHTML = "by <a href='"+url+"' onclick='window.open(this.href, \"fastlookpop\"); return false;'>"+txt+"</a>";
         return e;
+    },
+    
+    checkId: function( ev )
+    {
+        if( ev.target.id == "fastlookup" ) return true;
+        if( ev.target.parentNode ){
+            var t = ev.target.parentNode;
+            do{
+                if( t.id == "fastlookup" ) return true;
+            }while( t = t.parentNode );
+        }
+        return false;
     }
 };
 
-window.Parser = {
+Parser = {
     alc: function( txt )
     {
         var res = [];
@@ -109,7 +121,7 @@ window.Parser = {
     }
 };
 
-window.MousePos = {
+MousePos = {
     x: 0,
     y: 0,
 
@@ -125,7 +137,7 @@ window.MousePos = {
     }
 };
 
-window.PopUp = {
+PopUp = {
     obj: null,
     
     initialize: function()
@@ -212,41 +224,44 @@ window.PopUp = {
     }
 };
 
-window.System = {
+System = {
     txt: "",
     msgid_list: [],
     index: 0,
  
     clear: function()
     {
-        System.msgid_list = [];
+        this.msgid_list = [];
     },
 
     length: function()
     {
-        return System.msgid_list.length;
+        return this.msgid_list.length;
     },
 
     push: function( msgid )
     {
-        System.msgid_list.push( msgid );
+    	this.msgid_list.push( msgid );
     },
 
     initialize: function( txt )
     {
-        System.index = 0;
-        System.txt = txt;
+    	this.index = 0;
+    	this.txt = txt;
     },
 
     translation: function()
     {
-        if( System.msgid_list.length <= System.index ){
+    	if( this.length() == 0 ){
+    		return;
+    	}
+    	
+        if( this.length() <= this.index ){
             PopUp.notFound();
         }
         else{
-            var msgid = System.msgid_list[System.index++];
-            var txt = System.txt;
-            Connection.postMessage( {msgid:msgid, txt:txt} );
+            var msgid = this.msgid_list[this.index++];
+            Connection.postMessage( {msgid:msgid, txt:this.txt} );
         }
     },
 
@@ -258,105 +273,60 @@ window.System = {
     chooseTranslator: function( ev, is_word )
     {
         // System setting.
-        System.clear();
+        this.clear();
         
         // 最適化有効？
-        if( Options.optimum ){
+        if( Options.get('optimum') ){
         	// 有効なら単語単体の場合のみ excite を使用。
         	if( is_word ){
-        		System.tryExciteTranslator( ev );
+        		this.tryExciteTranslator( ev );
         	}
-        	System.tryGoogleTranslator( ev );
+        	this.tryGoogleTranslator( ev );
         }
         else{
-        	System.tryExciteTranslator( ev );
-        	System.tryGoogleTranslator( ev );
+        	this.tryExciteTranslator( ev );
+        	this.tryGoogleTranslator( ev );
         }
-        return System.length();
+        return this.length();
     },
     
     // excite.
     tryExciteTranslator: function( ev ){
-        if( Options.excite["use"] && ev.ctrlKey == Options.excite["ctrl_key"] && ev.shiftKey == Options.excite["shift_key"] && ev.altKey == Options.excite["alt_key"] ){
-            System.push( "excite_pre" );
+        if( Options.get('excite')["use"] && 
+        	ev.ctrlKey == Options.get('excite')["ctrl_key"] && ev.shiftKey == Options.get('excite')["shift_key"] && ev.altKey == Options.get('excite')["alt_key"] ){
+            this.push( "excite_pre" );
         }
     },
     
     // google.
     tryGoogleTranslator: function( ev ){
-        if( Options.google["use"] && ev.ctrlKey == Options.google["ctrl_key"] && ev.shiftKey == Options.google["shift_key"] && ev.altKey == Options.google["alt_key"] ){
-            System.push( "google" );
+        if( Options.get('google')["use"] && 
+        	ev.ctrlKey == Options.get('google')["ctrl_key"] && ev.shiftKey == Options.get('google')["shift_key"] && ev.altKey == Options.get('google')["alt_key"] ){
+        	this.push( "google" );
         }
     }
 };
 
-window.Options = {
-    font_size: 13,
-    excite: {},
-    google: {},
-    optimum: false,
+Options = {
+	options_data: {},
 
-    set: function( arg )
+    load: function( arg )
     {
-        Options.font_size = arg.font_size;
-        
-        // excite settings.
-        eval( "var excite = " + arg.excite );
-     
-        Options.excite["use"] = excite["use"] == "true" ? true : false;
-        Options.excite["shift_key"] = (excite["sc1"] == "Shift" || excite["sc2"] == "Shift") ? true : false;
-        Options.excite["ctrl_key"] = (excite["sc1"] == "Ctrl" || excite["sc2"] == "Ctrl") ? true : false;
-        Options.excite["alt_key"] = (excite["sc1"] == "Alt" || excite["sc2"] == "Alt") ? true : false;
-
-        // google settings.
-        eval( "var google = " + arg.google );
-
-        Options.google["use"] = google["use"] == "true" ? true : false;
-        Options.google["shift_key"] = (google["sc1"] == "Shift" || google["sc2"] == "Shift") ? true : false;
-        Options.google["ctrl_key"] = (google["sc1"] == "Ctrl" || google["sc2"] == "Ctrl") ? true : false;
-        Options.google["alt_key"] = (google["sc1"] == "Alt" || google["sc2"] == "Alt") ? true : false;
-        
-        // check short cut key
-        var check_scs = [];
-        if( Options.excite["use"] == true ) check_scs.push( Options.excite );
-        if( Options.google["use"] == true ) check_scs.push( Options.google );
-    	// 同一ショートカットが２つ以上だったら最適化有効
-    	if( Options._countSameShortcut( check_scs ) >= 2 ){
-    		Options.optimum = true;
-    	}
+    	this.options_data = JSON.parse( arg.options_data );
     },
     
-    // like private function.
-    _countSameShortcut: function( scs )
+    get: function(key)
     {
-    	var sctmp = null;
-    	var count = 0;
-    	for( var i = 0; i < scs.length; i++ ){
-    		var sc = scs[i];
-    		if( sctmp == null ){
-    			sctmp = {};
-    			sctmp["shift_key"] = sc["shift_key"];
-    			sctmp["ctrl_key"] = sc["ctrl_key"];
-    			sctmp["alt_key"] = sc["alt_key"];
-    		}
-    		else{
-    			if( sctmp["shift_key"] != sc["shift_key"] ) continue;
-    			if( sctmp["ctrl_key"] != sc["ctrl_key"] ) continue;
-    			if( sctmp["alt_key"] != sc["alt_key"] ) continue;
-    		}
-    		count++;
-    	}
-    	return count;
+    	return this.options_data[key];
     }
 };
 
-
-window.Receiver = {
+Receiver = {
     message: function( arg )
     {
         if( arg.msgid == "options" ){
-            Options.set( arg );
-            addStyle(); // after options loaded.
+            Options.load( arg );
+            Style.update();
         }
         else if( arg.msgid == "alc" ){
             var res = Parser.alc( arg.txt );
@@ -402,71 +372,100 @@ window.Receiver = {
    }
 };
 
-function checkId( ev )
-{
-    if( ev.target.id == "fastlookup" ) return true;
-    if( ev.target.parentNode ){
-        var t = ev.target.parentNode;
-        do{
-            if( t.id == "fastlookup" ) return true;
-        }while( t = t.parentNode );
-    }
-    return false;
-}
+Style = {
+	css: null,
+	text_node: null,
+		
+	/**
+	 * @brief スタイル追加
+	 */
+	add: function()
+	{
+	    Style.css = document.createElement( "style" );
+	    Style.text_node = document.createTextNode( Style._getStyle() );
+	    Style.css.type = "text/css";
+	    Style.css.appendChild( Style.text_node );
+	    document.getElementsByTagName( "head" )[0].appendChild( Style.css );
+	},
 
-function addStyle()
-{
-    var style;
+	/**
+	 * @brief スタイル更新
+	 */
+	update: function()
+	{
+		if( Style.css == null ){
+			Style.add();
+			return;
+		}
+		
+		if( Style.text_node != null ){
+			Style.css.removeChild( Style.text_node );
+		}
+		Style.text_node = document.createTextNode( Style._getStyle() );
+	    Style.css.appendChild( Style.text_node );
+	},
 
-    style = ['position: absolute',
-             'max-height: 50%',
-             '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
-             '-webkit-border-radius: 7px',
-             'overflow: auto',
-             'z-index: 9998'];
-    var fastlookup_top_css = "#fastlookup_top{" + style.join(";") + "}";
-    
-    style = ['border: 1px solid #000',
-             'background: #fff',
-             'display: block',
-             'width: auto',
-             'height: auto',
-             'max-height: 50%',
-             'color: #000',
-             'font-size: '+Options.font_size+'px',
-             'font-style: normal',
-             'font-variant: normal',
-             'font-weight: normal',
-             'text-align: left',
-             'padding:7px 7px 7px 7px',
-             'margin:0 0 0 0',
-             'z-index: 9998',
-             '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
-             '-webkit-border-radius: 7px',
-             'overflow: auto',
-             'opacity: .95'];
-    var fastlookup_css = "#fastlookup{" + style.join(";") + "}";
-    
-    var s = document.createElement( "style" );
-    var sc = document.createTextNode( fastlookup_top_css + fastlookup_css + " #fastlookup img{padding:0; margin:0; display:inline;} #fastlookup a{color:#000;}" );
-    s.type = "text/css";
-    s.appendChild( sc );
-    document.getElementsByTagName( "head" )[0].appendChild( s );
-}
+	/**
+	 * @brief スタイル文字列取得
+	 * @note
+	 * like private method.
+	 */
+	_getStyle: function()
+	{
+	    var style;
+	    style = ['position: absolute',
+	             'max-width: 70%',
+	             'max-height: 50%',
+	             '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
+	             '-webkit-border-radius: 7px',
+	             'padding:0',
+	             'margin:0',
+	             'overflow: auto',
+	             'z-index: 9998'];
+	    var fastlookup_top_css = "#fastlookup_top{" + style.join(";") + "}";
+	    
+	    style = ['border: 1px solid #000',
+	             'background: ' + Options.get('background_color'),
+	             'color: ' + Options.get('font_color'),
+	             'font-family:'+ Options.get('font_family'),
+	             'font-size: '+ Options.get('font_size') +'px',
+	             'font-style: ' + Options.get('font_style'),
+	             'opacity: ' + Options.get('opacity'),
+	             'font-variant: normal',
+	             'font-weight: normal',
+	             'display: block',
+	             'width: auto',
+	             'height: auto',
+	             'text-align: left',
+	             'padding:7px 7px 7px 7px',
+	             'margin:0',
+	             'z-index: 9998',
+	             '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
+	             '-webkit-border-radius: 7px',
+	             'overflow: auto'];
+	    var fastlookup_css = "#fastlookup{" + style.join(";") + "}";
+	    
+	    var other_css = "#fastlookup img{padding:0; margin:0; display:inline; border:0; clear:both;}" +
+						"#fastlookup a{color:#000; margin:0; padding:0;}" +
+						"#fastlookup p{margin:5px; padding:0;}";
+	    return fastlookup_top_css + fastlookup_css + other_css;
+	}
+};
 
 // --- main ---
+Style.add();
 
-// Load options & add style.
+// Load options.
 Connection = chrome.extension.connect( {name:"fastlookup"} );
 Connection.onMessage.addListener( Receiver.message );
 Connection.postMessage( {msgid:"options"} );
 
 // trigger.
 document.addEventListener( "mouseup", function( ev ){
-    if( !checkId( ev ) ){
+    if( !Utility.checkId( ev ) ){
         var txt = window.getSelection().toString();
         // 空文字、空白のみ、ショートカット未選択だったら何もしない
-        if( !txt || txt.match(/^\s+$/) || !System.chooseTranslator( ev, (txt.match(/^(\s|)\S+(\s|)$/) != null) ) ){
+        if( !txt || txt.match(/^\s+$/) || !System.chooseTranslator( ev, (txt.match(/^(\W+|)\S+(\W+|)$/) != null) ) ){
             return;
         }
         MousePos.set( ev );
@@ -480,11 +479,12 @@ document.addEventListener( "mouseup", function( ev ){
 }, false );
 
 document.addEventListener( "mousedown", function( ev ){
-    if( !checkId( ev ) ){
+    if( !Utility.checkId( ev ) ){
     	if( PopUp.exist() ){
     		window.getSelection().removeAllRanges();
     		PopUp.remove();
     	}
+    	System.clear();
     }
 }, false );
 
