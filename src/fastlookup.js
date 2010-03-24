@@ -178,14 +178,10 @@ PopUp = {
         }
         else{
             PopUp.initialize();
-            
-            var o = document.createElement( "div" );
-            o.setAttribute( "id", "fastlookup" );
             res.forEach( function( e ){
-                o.appendChild( e );
+                e.setAttribute( "id", "fastlookup" );
+                PopUp.obj.appendChild( e );
             });
-            PopUp.obj.appendChild( o );
-           
             document.body.appendChild( PopUp.obj );
             PopUp.position();
         }
