@@ -1,3 +1,6 @@
+v1.0.1
+    標準ロケートを ja に変更。
+
 v1.0.0
     Internationalization.(support en, ja)
     国際化。（英語, 日本語）
