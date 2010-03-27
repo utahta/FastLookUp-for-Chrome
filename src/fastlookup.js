@@ -193,7 +193,7 @@ PopUp = {
         var e = document.createElement( "div" );
         var i = document.createElement( "img" );
         i.src = loading_img_url;
-        var t = document.createTextNode( " 検索中..." );
+        var t = document.createTextNode( chrome.i18n.getMessage("search_for") );
         e.appendChild( i );
         e.appendChild( t );
         res.push( e );
@@ -204,7 +204,7 @@ PopUp = {
     {
         var res = [];
         var e = document.createElement( "div" );
-        e.appendChild( document.createTextNode( "項目が見つかりませんでした" ) );
+        e.appendChild( document.createTextNode( chrome.i18n.getMessage("no_items_found") ) );
         res.push( e );
         console.error( "errno:"+errno );
         PopUp.show( res );
@@ -214,7 +214,7 @@ PopUp = {
     {
         var res = [];
         var e = document.createElement( "div" );
-        e.appendChild( document.createTextNode( "項目が見つかりませんでした" ) );
+        e.appendChild( document.createTextNode( chrome.i18n.getMessage("no_items_found") ) );
         res.push( e );
         PopUp.show( res );
     }

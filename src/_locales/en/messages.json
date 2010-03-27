@@ -1,0 +1,9 @@
+{
+    "search_for": {
+        "message": " Searching for..."
+    },
+
+    "no_items_found": {
+        "message": "No items found"
+    }
+}

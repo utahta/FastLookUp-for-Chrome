@@ -1,0 +1,9 @@
+{
+    "search_for": {
+        "message": " 検索中..."
+    },
+
+    "no_items_found": {
+        "message": "項目が見つかりませんでした"
+    }
+}

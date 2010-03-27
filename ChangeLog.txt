@@ -1,3 +1,8 @@
+v1.0.0
+    Internationalization.(support en, ja)
+    国際化。（英語, 日本語）
+    正式版。
+
 v0.1.7.2
     bug fix.
     CSSの影響範囲に関する問題を修正。
