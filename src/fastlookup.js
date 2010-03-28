@@ -9,13 +9,13 @@ Utility = {
         return e;
     },
     
-    checkId: function( ev )
+    checkId: function( ev, id )
     {
-        if( ev.target.id == "fastlookup" ) return true;
+        if( ev.target.id == id ) return true;
         if( ev.target.parentNode ){
             var t = ev.target.parentNode;
             do{
-                if( t.id == "fastlookup" ) return true;
+                if( t.id == id ) return true;
             }while( t = t.parentNode );
         }
         return false;
@@ -37,7 +37,7 @@ Parser = {
         for( var i = 0; i < r.snapshotLength; i++ ){
             res.push( r.snapshotItem(i) );
         }
-        //res.push( Utility.createTag( "英辞郎 on the WEB", "http://www.alc.co.jp/" ) );
+        //res.push( Utility.createTag( "Alc", "http://www.alc.co.jp/" ) );
         return res;
     },
     
@@ -72,7 +72,7 @@ Parser = {
         for( var i = 0; i < r.snapshotLength; i++ ){
             var e = r.snapshotItem(i);
             try{
-                // <a>タグはポップアップ表示に変換します
+                // add window.open to <a> tag.
                 e.innerHTML = e.innerHTML.replace( /<a/g, "<a onclick='window.open(this.href, \"fastlookpop\", \"menubar=no, toolbar=no\"); return false;'" );
                 res.push( e );
             }
@@ -81,17 +81,20 @@ Parser = {
             e.setAttribute( "class", "" );
             res.push( e );
         }
-        //res.push( Utility.createTag( "excite翻訳", "http://www.excite.co.jp/world/" ) );
+        //res.push( Utility.createTag( "powerd by excite", "http://www.excite.co.jp/world/" ) );
         return res;
     },
     
-    google: function( txt )
+    google: function( txt, branding )
     {
         var res = [];
         var e = document.createElement( "div" );
         e.innerHTML = txt;
         res.push( e );
-        //res.push( Utility.createTag( "google翻訳", "http://translate.google.co.jp/" ) );
+        
+        var branding_e = document.createElement( "div" );
+        branding_e.innerHTML = branding;
+        res.push( branding_e );
         return res;
     },
 
@@ -137,19 +140,40 @@ MousePos = {
     }
 };
 
-PopUp = {
+Dialog = {
     obj: null,
+    loading_obj: null,
+    noitems_obj: null,
     
     initialize: function()
     {
-        PopUp.remove();
-        PopUp.obj = document.createElement( "div" );
-        PopUp.obj.setAttribute( "id", "fastlookup_top" );
+        if( this.exist() ){
+            return;
+        }        
+        // create a dialog element.
+        if( !document.getElementById('fastlookup_top') ){
+            var d = document.createElement( 'div' );
+            d.id = 'fastlookup_top';
+            document.body.appendChild( d );
+        }
+        this.obj = document.getElementById( 'fastlookup_top' );
+        
+        // create a loading element.
+        this.loading_obj = document.createElement( "div" );
+        var i = document.createElement( "img" );
+        i.src = loading_img_url;
+        var t = document.createTextNode( chrome.i18n.getMessage("search_for") );
+        this.loading_obj.appendChild( i );
+        this.loading_obj.appendChild( t );
+        
+        // create a no items element.
+        this.noitems_obj = document.createElement( "div" );
+        this.noitems_obj.appendChild( document.createTextNode( chrome.i18n.getMessage("no_items_found") ) );
     },
     
     exist: function()
     {
-        if( !PopUp.obj ){
+        if( this.obj == null || this.obj.style.display == 'none' ){
             return false;
         }
         return true;
@@ -157,66 +181,54 @@ PopUp = {
 
     remove: function()
     {
-        if( !PopUp.exist() ){
+        if( !this.exist() ){
             return;
         }
-        PopUp.obj.parentNode.removeChild( PopUp.obj );
-        PopUp.obj = null;
+        this.obj.style.display = 'none';
+        for( var i = this.obj.childNodes.length-1; i >= 0; i-- ){
+            this.obj.removeChild( this.obj.childNodes[i] );
+        }
     },
 
     position: function()
     {
-        var s = PopUp.obj.style;
-        s.left = (MousePos.x + 15) + "px";
-        s.top = (MousePos.y + 15) + "px";
+        this.obj.style.left = (MousePos.x + 15) + "px";
+        this.obj.style.top = (MousePos.y + 15) + "px";
     },
 
     show: function( res )
     {
         if( !res.length ){
-            PopUp.notFound();
+            this.notFound();
         }
         else{
-            PopUp.initialize();
+            this.remove();
             res.forEach( function( e ){
-                e.setAttribute( "id", "fastlookup" );
-                PopUp.obj.appendChild( e );
+                e.id = 'fastlookup';
+                Dialog.obj.appendChild( e );
             });
-            document.body.appendChild( PopUp.obj );
-            PopUp.position();
+            this.obj.style.display = 'block';
+            this.position();
         }
     },
 
     loading: function()
     {
-        var res = [];
-        var e = document.createElement( "div" );
-        var i = document.createElement( "img" );
-        i.src = loading_img_url;
-        var t = document.createTextNode( chrome.i18n.getMessage("search_for") );
-        e.appendChild( i );
-        e.appendChild( t );
-        res.push( e );
-        PopUp.show( res );
+        var res = [this.loading_obj];
+        this.show( res );
     },
 
     error: function( errno )
     {
-        var res = [];
-        var e = document.createElement( "div" );
-        e.appendChild( document.createTextNode( chrome.i18n.getMessage("no_items_found") ) );
-        res.push( e );
+        var res = [this.noitems_obj];
         console.error( "errno:"+errno );
-        PopUp.show( res );
+        this.show( res );
     },
 
     notFound: function()
     {
-        var res = [];
-        var e = document.createElement( "div" );
-        e.appendChild( document.createTextNode( chrome.i18n.getMessage("no_items_found") ) );
-        res.push( e );
-        PopUp.show( res );
+        var res = [this.noitems_obj];
+        this.show( res );
     }
 };
 
@@ -253,7 +265,7 @@ System = {
         }
         
         if( this.length() <= this.index ){
-            PopUp.notFound();
+            Dialog.notFound();
         }
         else{
             var msgid = this.msgid_list[this.index++];
@@ -262,18 +274,18 @@ System = {
     },
 
     /**
-     * @brief 翻訳機を選択
-     * @param ev イベントオブジェクト
-     * @param is_word 単語単体だったら true.
+     * @brief choose a translator.
+     * @param ev event object.
+     * @param is_word true:Word, false:Sentence
      */
     chooseTranslator: function( ev, is_word )
     {
         // System setting.
         this.clear();
         
-        // 最適化有効？
+        // enable optimum?
         if( Options.get('optimum') ){
-            // 有効なら単語単体の場合のみ excite を使用。
+            // using excite.
             if( is_word ){
                 this.tryExciteTranslator( ev );
             }
@@ -330,7 +342,7 @@ Receiver = {
                 System.translation();
             }
             else{
-                PopUp.show( res );
+                Dialog.show( res );
             }
         }
         else if( arg.msgid == "excite_pre" ){
@@ -348,7 +360,7 @@ Receiver = {
                 System.translation();
             }
             else{
-                PopUp.show( res );
+                Dialog.show( res );
             }
         }
         else if( arg.msgid == "google" ){
@@ -356,14 +368,14 @@ Receiver = {
                 System.translation();
             }
             else{
-                PopUp.show( Parser.google( arg.txt ) );
+                Dialog.show( Parser.google( arg.txt, arg.branding ) );
             }
         }
         else if( arg.msgid == "loading" ){
-            PopUp.loading();
+            Dialog.loading();
         }
         else if( arg.msgid == "error" ){
-            PopUp.error( arg.errno );
+            Dialog.error( arg.errno );
         }
    }
 };
@@ -373,7 +385,7 @@ Style = {
     text_node: null,
         
     /**
-     * @brief スタイル追加
+     * @brief add style to head.
      */
     add: function()
     {
@@ -385,7 +397,7 @@ Style = {
     },
 
     /**
-     * @brief スタイル更新
+     * @brief update style
      */
     update: function()
     {
@@ -402,54 +414,54 @@ Style = {
     },
 
     /**
-     * @brief スタイル文字列取得
+     * @brief get style string.
      * @note
      * like private method.
      */
     _getStyle: function()
     {
         var style;
-        style = ['position: absolute',
-                 'max-width: 70%',
-                 'max-height: 50%',
-                 '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
-                 '-webkit-border-radius: 7px',
-                 'padding:0',
-                 'margin:0',
-                 'overflow: auto',
-                 'z-index: 9998'];
+        style = ['position: absolute !important',
+                 'border: 1px solid #000 !important',
+                 'background: ' + Options.get('background_color') + " !important",
+                 'top: 0',
+                 'left: 0',
+                 'max-width: 70% !important',
+                 'max-height: 50% !important',
+                 'width: auto !important',
+                 'height: auto !important',
+                 'display: none',
+                 'padding:7px !important',
+                 'margin:0 !important',
+                 'z-index: 999999 !important',
+                 '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65) !important',
+                 '-webkit-border-radius: 7px !important',
+                 'overflow: auto !important'];
         var fastlookup_top_css = "#fastlookup_top{" + style.join(";") + "}";
         
-        style = ['border: 1px solid #000',
-                 'background: ' + Options.get('background_color'),
-                 'color: ' + Options.get('font_color'),
-                 'font-family:'+ Options.get('font_family'),
-                 'font-size: '+ Options.get('font_size') +'px',
-                 'font-style: ' + Options.get('font_style'),
-                 'opacity: ' + Options.get('opacity'),
-                 'font-variant: normal',
-                 'font-weight: normal',
-                 'display: block',
-                 'width: auto',
-                 'height: auto',
-                 'text-align: left',
-                 'padding:7px 7px 7px 7px',
-                 'margin:0',
-                 'z-index: 9998',
-                 '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65)',
-                 '-webkit-border-radius: 7px',
-                 'overflow: auto'];
+        style = ['color: ' + Options.get('font_color') + ' !important',
+                 'font-family:'+ Options.get('font_family') + ' !important',
+                 'font-size: '+ Options.get('font_size') +'px !important',
+                 'font-style: ' + Options.get('font_style') + ' !important',
+                 'opacity: ' + Options.get('opacity') + ' !important',
+                 'font-variant: normal !important',
+                 'font-weight: normal !important',
+                 'text-align: left !important',
+                 'padding:0 !important',
+                 'margin:0 !important'];
         var fastlookup_css = "#fastlookup{" + style.join(";") + "}";
         
         var other_css = "#fastlookup img{padding:0; margin:0; display:inline; border:0; clear:both;}" +
                         "#fastlookup a{color:#000; margin:0; padding:0;}" +
                         "#fastlookup p{margin:5px; padding:0;}";
+
         return fastlookup_top_css + fastlookup_css + other_css;
     }
 };
 
 // --- main ---
 Style.add();
+Dialog.initialize();
 
 // Connection & Load options.
 Connection = chrome.extension.connect( {name:"fastlookup"} );
@@ -458,9 +470,9 @@ Connection.postMessage( {msgid:"options"} );
 
 // trigger.
 document.addEventListener( "mouseup", function( ev ){
-    if( !Utility.checkId( ev ) ){
+    if( !Utility.checkId( ev, 'fastlookup_top' ) ){
         var txt = window.getSelection().toString();
-        // 空文字、空白のみ、ショートカット未選択だったら何もしない
+        // empty or only space or not select short cut?
         if( !txt || txt.match(/^\s+$/) || !System.chooseTranslator( ev, (txt.match(/^(\W+|)\S+(\W+|)$/) != null) ) ){
             return;
         }
@@ -472,10 +484,10 @@ document.addEventListener( "mouseup", function( ev ){
 }, false );
 
 document.addEventListener( "mousedown", function( ev ){
-    if( !Utility.checkId( ev ) ){
-        if( PopUp.exist() ){
+    if( !Utility.checkId( ev, 'fastlookup_top' ) ){
+        if( Dialog.exist() ){
             window.getSelection().removeAllRanges();
-            PopUp.remove();
+            Dialog.remove();
         }
         System.clear();
     }

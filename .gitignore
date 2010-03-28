@@ -2,3 +2,4 @@
 ._src.crx
 .project
 .settings
+.tmp_*

@@ -74,7 +74,8 @@ Request = {
                     Connection.postMessage( {msgid:"error", errno:""+detect_res.error} );
                     return;
                 }
-                Connection.postMessage( {msgid:"google", txt:""+res.translation} );
+                var branding = google.language.getBranding().innerHTML;
+                Connection.postMessage( {msgid:"google", txt:""+res.translation, branding:branding} );
             });
         });
     },
@@ -152,7 +153,7 @@ Options = {
     {
         var translator_list = ['excite', 'google'];
         var sc_list = ['sc1', 'sc2'];
-        // ショートカットキー要素調査
+        // check short cut kyes.
         for( var i = 0; i < translator_list.length; i++ ){
             var key = translator_list[i];
             this.options_data[key].shift_key = false;
@@ -167,16 +168,15 @@ Options = {
             }
         }
 
-        // 最適化調査
+        // check optimum.
         var check_scs = [];
         for( var i = 0; i < translator_list.length; i++ ){
             var key = translator_list[i];
             if( this.options_data[key]["use"] == true ) check_scs.push( this.options_data[key] );
         }
-        // 同一ショートカットが２つ以上だったら最適化有効
         this.options_data.optimum = (this._countSameShortcut( check_scs ) >= 2) ? true : false;
 
-        // 保存
+        // save
         localStorage.setItem( "options", JSON.stringify(this.options_data) );
     },
 
