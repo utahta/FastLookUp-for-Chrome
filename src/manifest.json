@@ -1,6 +1,6 @@
 {
     "name": "FastLookUp for Chrome",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "A translator extension for chrome.",
     "options_page": "options.html",
     "background_page": "background.html",
@@ -21,5 +21,5 @@
         "js": ["fastlookup.js"]
         }
     ],
-    "default_locale": "ja"
+    "default_locale": "en"
 }

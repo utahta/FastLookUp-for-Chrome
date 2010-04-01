@@ -78,6 +78,7 @@ Parser = {
             }
             catch(e){
             }
+            e.setAttribute( "id", "fastlookup" );
             e.setAttribute( "class", "" );
             res.push( e );
         }
@@ -89,10 +90,12 @@ Parser = {
     {
         var res = [];
         var e = document.createElement( "div" );
+        e.setAttribute( 'id', 'fastlookup' );
         e.innerHTML = txt;
         res.push( e );
         
         var branding_e = document.createElement( "div" );
+        branding_e.style.paddingTop = "3px";
         branding_e.innerHTML = branding;
         res.push( branding_e );
         return res;
@@ -102,9 +105,10 @@ Parser = {
     {
         try{
             var e = document.createElement( "div" );
-            e.innerHTML = txt; // throw dom exception.
+            e.innerHTML = txt;
         }
         catch(e){
+            // catch dom exception.
             return false;
         }
         
@@ -141,7 +145,7 @@ MousePos = {
 };
 
 Dialog = {
-    obj: null,
+    top_obj: null,
     loading_obj: null,
     noitems_obj: null,
     
@@ -156,10 +160,11 @@ Dialog = {
             d.id = 'fastlookup_top';
             document.body.appendChild( d );
         }
-        this.obj = document.getElementById( 'fastlookup_top' );
+        this.top_obj = document.getElementById( 'fastlookup_top' );
         
         // create a loading element.
         this.loading_obj = document.createElement( "div" );
+        this.loading_obj.setAttribute( 'id', 'fastlookup' );
         var i = document.createElement( "img" );
         i.src = loading_img_url;
         var t = document.createTextNode( chrome.i18n.getMessage("search_for") );
@@ -168,12 +173,13 @@ Dialog = {
         
         // create a no items element.
         this.noitems_obj = document.createElement( "div" );
+        this.noitems_obj.setAttribute( 'id', 'fastlookup' );
         this.noitems_obj.appendChild( document.createTextNode( chrome.i18n.getMessage("no_items_found") ) );
     },
     
     exist: function()
     {
-        if( this.obj == null || this.obj.style.display == 'none' ){
+        if( this.top_obj == null || this.top_obj.style.display == 'none' ){
             return false;
         }
         return true;
@@ -184,16 +190,16 @@ Dialog = {
         if( !this.exist() ){
             return;
         }
-        this.obj.style.display = 'none';
-        for( var i = this.obj.childNodes.length-1; i >= 0; i-- ){
-            this.obj.removeChild( this.obj.childNodes[i] );
+        this.top_obj.style.display = 'none';
+        for( var i = this.top_obj.childNodes.length-1; i >= 0; i-- ){
+            this.top_obj.removeChild( this.top_obj.childNodes[i] );
         }
     },
 
     position: function()
     {
-        this.obj.style.left = (MousePos.x + 15) + "px";
-        this.obj.style.top = (MousePos.y + 15) + "px";
+        this.top_obj.style.left = (MousePos.x + 15) + "px";
+        this.top_obj.style.top = (MousePos.y + 15) + "px";
     },
 
     show: function( res )
@@ -204,10 +210,9 @@ Dialog = {
         else{
             this.remove();
             res.forEach( function( e ){
-                e.id = 'fastlookup';
-                Dialog.obj.appendChild( e );
+                Dialog.top_obj.appendChild( e );
             });
-            this.obj.style.display = 'block';
+            this.top_obj.style.display = 'block';
             this.position();
         }
     },
@@ -447,7 +452,6 @@ Style = {
                  'font-variant: normal !important',
                  'font-weight: normal !important',
                  'text-align: left !important',
-                 'padding:0 !important',
                  'margin:0 !important'];
         var fastlookup_css = "#fastlookup{" + style.join(";") + "}";
         

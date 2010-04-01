@@ -59,24 +59,15 @@ Request = {
     google: function( txt )
     {
         Connection.postMessage( {msgid:"loading"} );
-        google.language.detect( txt, function( detect_res ){
-            if( detect_res.error ){
+        var from_lang = Options.get('google')['from'];
+        var to_lang = Options.get('google')['to'];
+        google.language.translate( txt, from_lang, to_lang, function( res ){
+            if( res.error ){
                 Connection.postMessage( {msgid:"error", errno:""+detect_res.error} );
                 return;
             }
-            var src_lang = detect_res.language;
-            var dest_lang = 'ja';
-            if( src_lang == "ja" ){
-                dest_lang = 'en';
-            }
-            google.language.translate( txt, src_lang, dest_lang, function( res ){
-                if( res.error ){
-                    Connection.postMessage( {msgid:"error", errno:""+detect_res.error} );
-                    return;
-                }
-                var branding = google.language.getBranding().innerHTML;
-                Connection.postMessage( {msgid:"google", txt:""+res.translation, branding:branding} );
-            });
+            var branding = google.language.getBranding().innerHTML;
+            Connection.postMessage( {msgid:"google", txt:""+res.translation, branding:branding} );
         });
     },
 
@@ -97,6 +88,7 @@ Request = {
 
 Options = {
     default_data:{
+        version: 1,
         background_color: '#ffffff',
         font_color: '#000000',
         font_size: 13,
@@ -113,6 +105,8 @@ Options = {
         },
         google:{
             use:'true',
+            from: '',
+            to: 'ja',
             sc1:'none',
             sc2:'Ctrl',
             shift_key: false,
@@ -129,6 +123,16 @@ Options = {
             chrome.tabs.create( {url:"options.html"} );
             this.options_data = this.default_data;
             this.save();
+        }
+        else{
+            this.options_data = JSON.parse( options );
+            // if options not supported version
+            if( !this.options_data.version ){
+                this.options_data.version = 1;
+                this.options_data.google.from = '';
+                this.options_data.google.to = 'ja';
+                this.save();
+            }
         }
     },
     
