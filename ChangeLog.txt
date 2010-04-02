@@ -1,5 +1,10 @@
+v1.1.0
+    google 翻訳のショートカットを追加（３つ）。
+    add shortcut on google translate.
+    
 v1.0.3
     google 翻訳言語指定を追加。
+    add translatable language.
 
 v1.0.2
     google ブランド表示を追加。

@@ -56,12 +56,9 @@ Request = {
         this.send( "excite", "http://www.excite.co.jp"+txt );
     },
 
-    google: function( txt )
+    google: function( txt, from, to )
     {
-        Connection.postMessage( {msgid:"loading"} );
-        var from_lang = Options.get('google')['from'];
-        var to_lang = Options.get('google')['to'];
-        google.language.translate( txt, from_lang, to_lang, function( res ){
+        google.language.translate( txt, from, to, function( res ){
             if( res.error ){
                 Connection.postMessage( {msgid:"error", errno:""+detect_res.error} );
                 return;
@@ -80,7 +77,6 @@ Request = {
         x.onerror = function( res ){
             Connection.postMessage( {msgid:"error", errno:""+x.status} );
         };
-        Connection.postMessage( {msgid:"loading"} );
         x.open( 'GET', url, true );
         x.send( null );
     }
@@ -88,7 +84,7 @@ Request = {
 
 Options = {
     default_data:{
-        version: 1,
+        version: 2,
         background_color: '#ffffff',
         font_color: '#000000',
         font_size: 13,
@@ -105,13 +101,31 @@ Options = {
         },
         google:{
             use:'true',
-            from: '',
-            to: 'ja',
-            sc1:'none',
-            sc2:'Ctrl',
-            shift_key: false,
-            ctrl_key: true,
-            alt_key: false
+            settings:[{
+                from: '',
+                to: 'ja',
+                sc1:'none',
+                sc2:'Ctrl',
+                shift_key: false,
+                ctrl_key: true,
+                alt_key: false
+            },{
+                from: '',
+                to: 'en',
+                sc1:'none',
+                sc2:'Shift',
+                shift_key: true,
+                ctrl_key: false,
+                alt_key: false
+            },{
+                from: '',
+                to: 'zh-CN',
+                sc1:'none',
+                sc2:'Alt',
+                shift_key: false,
+                ctrl_key: false,
+                alt_key: true
+            }]
         }
     },
     options_data: null,
@@ -128,9 +142,61 @@ Options = {
             this.options_data = JSON.parse( options );
             // if options not supported version
             if( !this.options_data.version ){
-                this.options_data.version = 1;
-                this.options_data.google.from = '';
-                this.options_data.google.to = 'ja';
+                this.options_data.version = 2;
+                this.options_data.google.settings = [{
+                    from: '',
+                    to: 'ja',
+                    sc1: this.options_data.google.sc1,
+                    sc2: this.options_data.google.sc2,
+                    shift_key: this.options_data.google.shift_key,
+                    ctrl_key: this.options_data.google.ctrl_key,
+                    alt_key: this.options_data.google.alt_key
+                },{
+                    from: '',
+                    to: 'en',
+                    sc1:'none',
+                    sc2:'Shift',
+                    shift_key: true,
+                    ctrl_key: false,
+                    alt_key: false
+                },{
+                    from: '',
+                    to: 'zh-CN',
+                    sc1:'none',
+                    sc2:'Alt',
+                    shift_key: false,
+                    ctrl_key: false,
+                    alt_key: true
+                }];
+                this.save();
+            }
+            else if( this.options_data.version == 1 ){
+                this.options_data.version = 2;
+                this.options_data.google.settings = [{
+                    from: this.options_data.google.from,
+                    to: this.options_data.google.to,
+                    sc1: this.options_data.google.sc1,
+                    sc2: this.options_data.google.sc2,
+                    shift_key: this.options_data.google.shift_key,
+                    ctrl_key: this.options_data.google.ctrl_key,
+                    alt_key: this.options_data.google.alt_key
+                },{
+                    from: '',
+                    to: 'en',
+                    sc1:'none',
+                    sc2:'Shift',
+                    shift_key: true,
+                    ctrl_key: false,
+                    alt_key: false
+                },{
+                    from: '',
+                    to: 'zh-CN',
+                    sc1:'none',
+                    sc2:'Alt',
+                    shift_key: false,
+                    ctrl_key: false,
+                    alt_key: true
+                }];
                 this.save();
             }
         }
@@ -155,56 +221,30 @@ Options = {
 
     save: function()
     {
-        var translator_list = ['excite', 'google'];
-        var sc_list = ['sc1', 'sc2'];
-        // check short cut kyes.
-        for( var i = 0; i < translator_list.length; i++ ){
-            var key = translator_list[i];
-            this.options_data[key].shift_key = false;
-            this.options_data[key].ctrl_key = false;
-            this.options_data[key].alt_key = false;
-
-            for( var j = 0; j < sc_list.length; j++ ){
-                var sc = sc_list[j];
-                if( this.options_data[key][sc] == "Shift" ) this.options_data[key].shift_key = true;
-                if( this.options_data[key][sc] == "Ctrl" ) this.options_data[key].ctrl_key = true;
-                if( this.options_data[key][sc] == "Alt" ) this.options_data[key].alt_key = true;
-            }
+        this.options_data['excite'].shift_key = false;
+        this.options_data['excite'].ctrl_key = false;
+        this.options_data['excite'].alt_key = false;
+        if( this.options_data['excite'].sc1 == "Shift" ) this.options_data['excite'].shift_key = true;
+        if( this.options_data['excite'].sc1 == "Ctrl" ) this.options_data['excite'].ctrl_key = true;
+        if( this.options_data['excite'].sc1 == "Alt" ) this.options_data['excite'].alt_key = true;
+        if( this.options_data['excite'].sc2 == "Shift" ) this.options_data['excite'].shift_key = true;
+        if( this.options_data['excite'].sc2 == "Ctrl" ) this.options_data['excite'].ctrl_key = true;
+        if( this.options_data['excite'].sc2 == "Alt" ) this.options_data['excite'].alt_key = true;
+        
+        for (var i = 0; i < this.options_data['google'].settings.length; i++) {
+            this.options_data['google'].settings[i].shift_key = false;
+            this.options_data['google'].settings[i].ctrl_key = false;
+            this.options_data['google'].settings[i].alt_key = false;
+            if (this.options_data['google'].settings[i].sc1 == "Shift") this.options_data['google'].settings[i].shift_key = true;
+            if (this.options_data['google'].settings[i].sc1 == "Ctrl") this.options_data['google'].settings[i].ctrl_key = true;
+            if (this.options_data['google'].settings[i].sc1 == "Alt") this.options_data['google'].settings[i].alt_key = true;
+            if (this.options_data['google'].settings[i].sc2 == "Shift") this.options_data['google'].settings[i].shift_key = true;
+            if (this.options_data['google'].settings[i].sc2 == "Ctrl") this.options_data['google'].settings[i].ctrl_key = true;
+            if (this.options_data['google'].settings[i].sc2 == "Alt") this.options_data['google'].settings[i].alt_key = true;
         }
-
-        // check optimum.
-        var check_scs = [];
-        for( var i = 0; i < translator_list.length; i++ ){
-            var key = translator_list[i];
-            if( this.options_data[key]["use"] == true ) check_scs.push( this.options_data[key] );
-        }
-        this.options_data.optimum = (this._countSameShortcut( check_scs ) >= 2) ? true : false;
-
+        
         // save
         localStorage.setItem( "options", JSON.stringify(this.options_data) );
-    },
-
-    // like private function.
-    _countSameShortcut: function( scs )
-    {
-        var sctmp = null;
-        var count = 0;
-        for( var i = 0; i < scs.length; i++ ){
-            var sc = scs[i];
-            if( sctmp == null ){
-                sctmp = {};
-                sctmp["shift_key"] = sc["shift_key"];
-                sctmp["ctrl_key"] = sc["ctrl_key"];
-                sctmp["alt_key"] = sc["alt_key"];
-            }
-            else{
-                if( sctmp["shift_key"] != sc["shift_key"] ) continue;
-                if( sctmp["ctrl_key"] != sc["ctrl_key"] ) continue;
-                if( sctmp["alt_key"] != sc["alt_key"] ) continue;
-            }
-            count++;
-        }
-        return count;
     },
 
     set: function(key, value)
@@ -247,7 +287,7 @@ Receiver = {
             Request.excite( arg.txt );
         }
         else if( arg.msgid == "google" ){
-            Request.google( arg.txt );
+            Request.google( arg.txt, arg.from, arg.to );
         }
     },
 

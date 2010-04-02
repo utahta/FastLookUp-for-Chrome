@@ -252,9 +252,28 @@ System = {
         return this.msgid_list.length;
     },
 
-    push: function( msgid )
+    push: function( msgid, from, to )
     {
-        this.msgid_list.push( msgid );
+        this.msgid_list.push( {
+            msgid: msgid,
+            from: from,
+            to: to
+        });
+    },
+    
+    remove: function( msgid )
+    {
+        var index = -1;
+        for( var i = 0; i < this.length(); i++ ){
+            if( this.msgid_list[i].msgid == msgid ){
+                index = i;
+                break;
+            }
+        }
+        if( index < 0 ){
+            return;
+        }
+        this.msgid_list.splice( index, 1 );
     },
 
     initialize: function( txt )
@@ -273,49 +292,61 @@ System = {
             Dialog.notFound();
         }
         else{
-            var msgid = this.msgid_list[this.index++];
-            Connection.postMessage( {msgid:msgid, txt:this.txt} );
+            var msgid = this.msgid_list[this.index].msgid;
+            var from = this.msgid_list[this.index].from;
+            var to = this.msgid_list[this.index].to;
+            this.index++;
+            Dialog.loading();
+            Connection.postMessage( {msgid:msgid, from:from, to:to, txt:this.txt} );
         }
     },
 
     /**
      * @brief choose a translator.
      * @param ev event object.
-     * @param is_word true:Word, false:Sentence
+     * @param txt Word or Sentence
      */
-    chooseTranslator: function( ev, is_word )
+    chooseTranslator: function( ev, txt )
     {
         // System setting.
         this.clear();
+
+        // add translator.
+        this._addExciteTranslator( ev );
+        this._addGoogleTranslator( ev );
         
         // enable optimum?
-        if( Options.get('optimum') ){
-            // using excite.
-            if( is_word ){
-                this.tryExciteTranslator( ev );
+        if( this.length() >= 2 ){
+            // remove excite?
+            if( txt.match(/^(\W+|)\S+(\W+|)$/) == null ){
+                this.remove('excite_pre');
             }
-            this.tryGoogleTranslator( ev );
-        }
-        else{
-            this.tryExciteTranslator( ev );
-            this.tryGoogleTranslator( ev );
         }
         return this.length();
     },
     
     // excite.
-    tryExciteTranslator: function( ev ){
-        if( Options.get('excite')["use"] && 
-            ev.ctrlKey == Options.get('excite')["ctrl_key"] && ev.shiftKey == Options.get('excite')["shift_key"] && ev.altKey == Options.get('excite')["alt_key"] ){
+    _addExciteTranslator: function( ev ){
+        if( Options.get('excite').use && 
+            ev.ctrlKey == Options.get('excite').ctrl_key && 
+            ev.shiftKey == Options.get('excite').shift_key && 
+            ev.altKey == Options.get('excite').alt_key ){
             this.push( "excite_pre" );
         }
     },
     
     // google.
-    tryGoogleTranslator: function( ev ){
-        if( Options.get('google')["use"] && 
-            ev.ctrlKey == Options.get('google')["ctrl_key"] && ev.shiftKey == Options.get('google')["shift_key"] && ev.altKey == Options.get('google')["alt_key"] ){
-            this.push( "google" );
+    _addGoogleTranslator: function( ev ){
+        var google = Options.get('google');
+        if( google.use ){
+            for( var i = 0; i < google.settings.length; i++ ){
+                if( ev.ctrlKey == google.settings[i].ctrl_key && 
+                    ev.shiftKey == google.settings[i].shift_key && 
+                    ev.altKey == google.settings[i].alt_key ){
+                    this.push( "google", google.settings[i].from, google.settings[i].to );
+                    break;
+                }
+            }
         }
     }
 };
@@ -375,9 +406,6 @@ Receiver = {
             else{
                 Dialog.show( Parser.google( arg.txt, arg.branding ) );
             }
-        }
-        else if( arg.msgid == "loading" ){
-            Dialog.loading();
         }
         else if( arg.msgid == "error" ){
             Dialog.error( arg.errno );
@@ -477,7 +505,7 @@ document.addEventListener( "mouseup", function( ev ){
     if( !Utility.checkId( ev, 'fastlookup_top' ) ){
         var txt = window.getSelection().toString();
         // empty or only space or not select short cut?
-        if( !txt || txt.match(/^\s+$/) || !System.chooseTranslator( ev, (txt.match(/^(\W+|)\S+(\W+|)$/) != null) ) ){
+        if( !txt || txt.match(/^\s+$/) || !System.chooseTranslator( ev, txt ) ){
             return;
         }
         MousePos.set( ev );
