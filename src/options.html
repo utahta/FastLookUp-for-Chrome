@@ -201,7 +201,7 @@ Configure = {
         Options.set( 'google', google );
         
         Options.save();
-        //console.log( JSON.stringify(Options.options_data) );
+        console.log( JSON.stringify(Options.options_data) );
         Options.notifyAll();
         slideToggle( "save_result", 'normal' );
 	    fadeOutToggle( "save_result", 2000 );
@@ -261,6 +261,7 @@ function appendGoogleSetting( no )
                         '<option>Shift</option>',
                         '<option>Ctrl</option>',
                         '<option>Alt</option>',
+                        '<option>Meta</option>',
                     '</select>',
                     '+',
                     '<select name="sc2_google'+no+'">',
@@ -268,6 +269,7 @@ function appendGoogleSetting( no )
                         '<option>Shift</option>',
                         '<option>Ctrl</option>',
                         '<option>Alt</option>',
+                        '<option>Meta</option>',
                     '</select>',
                     '+ Select',
                     '<br>',
@@ -486,6 +488,7 @@ function fadeOutToggle( id, arg )
                     <option>Shift</option>
                     <option>Ctrl</option>
                     <option>Alt</option>
+                    <option>Meta</option>
                 </select>
                 +
                 <select name='sc2_excite'>
@@ -493,6 +496,7 @@ function fadeOutToggle( id, arg )
                     <option>Shift</option>
                     <option>Ctrl</option>
                     <option>Alt</option>
+                    <option>Meta</option>
                 </select>
                 + Select
                 <br>

@@ -1,3 +1,7 @@
+v1.1.1
+    metaキーに対応。（MacのCommandキーをショートカットキーとして使えるように。）
+    support meta key.(for mac)
+
 v1.1.0
     google 翻訳のショートカットを追加（３つ）。
     add shortcut on google translate.

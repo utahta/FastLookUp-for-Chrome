@@ -330,7 +330,8 @@ System = {
         if( Options.get('excite').use && 
             ev.ctrlKey == Options.get('excite').ctrl_key && 
             ev.shiftKey == Options.get('excite').shift_key && 
-            ev.altKey == Options.get('excite').alt_key ){
+            ev.altKey == Options.get('excite').alt_key &&
+            ev.metaKey == Options.get('excite').meta_key ){
             this.push( "excite_pre" );
         }
     },
@@ -342,7 +343,8 @@ System = {
             for( var i = 0; i < google.settings.length; i++ ){
                 if( ev.ctrlKey == google.settings[i].ctrl_key && 
                     ev.shiftKey == google.settings[i].shift_key && 
-                    ev.altKey == google.settings[i].alt_key ){
+                    ev.altKey == google.settings[i].alt_key &&
+                    ev.metaKey == google.settings[i].meta_key ){
                     this.push( "google", google.settings[i].from, google.settings[i].to );
                     break;
                 }

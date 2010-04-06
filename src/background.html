@@ -84,7 +84,7 @@ Request = {
 
 Options = {
     default_data:{
-        version: 2,
+        version: 3,
         background_color: '#ffffff',
         font_color: '#000000',
         font_size: 13,
@@ -97,7 +97,8 @@ Options = {
             sc2:'Ctrl',
             shift_key: false,
             ctrl_key: true,
-            alt_key: false
+            alt_key: false,
+            meta_key: false
         },
         google:{
             use:'true',
@@ -108,7 +109,8 @@ Options = {
                 sc2:'Ctrl',
                 shift_key: false,
                 ctrl_key: true,
-                alt_key: false
+                alt_key: false,
+                meta_key: false
             },{
                 from: '',
                 to: 'en',
@@ -116,7 +118,8 @@ Options = {
                 sc2:'Shift',
                 shift_key: true,
                 ctrl_key: false,
-                alt_key: false
+                alt_key: false,
+                meta_key: false
             },{
                 from: '',
                 to: 'zh-CN',
@@ -124,7 +127,8 @@ Options = {
                 sc2:'Alt',
                 shift_key: false,
                 ctrl_key: false,
-                alt_key: true
+                alt_key: true,
+                meta_key: false
             }]
         }
     },
@@ -142,7 +146,7 @@ Options = {
             this.options_data = JSON.parse( options );
             // if options not supported version
             if( !this.options_data.version ){
-                this.options_data.version = 2;
+                this.options_data.version = this.default_data.version;
                 this.options_data.google.settings = [{
                     from: '',
                     to: 'ja',
@@ -150,28 +154,12 @@ Options = {
                     sc2: this.options_data.google.sc2,
                     shift_key: this.options_data.google.shift_key,
                     ctrl_key: this.options_data.google.ctrl_key,
-                    alt_key: this.options_data.google.alt_key
-                },{
-                    from: '',
-                    to: 'en',
-                    sc1:'none',
-                    sc2:'Shift',
-                    shift_key: true,
-                    ctrl_key: false,
-                    alt_key: false
-                },{
-                    from: '',
-                    to: 'zh-CN',
-                    sc1:'none',
-                    sc2:'Alt',
-                    shift_key: false,
-                    ctrl_key: false,
-                    alt_key: true
-                }];
+                    alt_key: this.options_data.google.alt_key,
+                }, this.default_data.google.settings[1], this.default_data.google.settings[2]];
                 this.save();
             }
             else if( this.options_data.version == 1 ){
-                this.options_data.version = 2;
+                this.options_data.version = this.default_data.version;
                 this.options_data.google.settings = [{
                     from: this.options_data.google.from,
                     to: this.options_data.google.to,
@@ -179,24 +167,12 @@ Options = {
                     sc2: this.options_data.google.sc2,
                     shift_key: this.options_data.google.shift_key,
                     ctrl_key: this.options_data.google.ctrl_key,
-                    alt_key: this.options_data.google.alt_key
-                },{
-                    from: '',
-                    to: 'en',
-                    sc1:'none',
-                    sc2:'Shift',
-                    shift_key: true,
-                    ctrl_key: false,
-                    alt_key: false
-                },{
-                    from: '',
-                    to: 'zh-CN',
-                    sc1:'none',
-                    sc2:'Alt',
-                    shift_key: false,
-                    ctrl_key: false,
-                    alt_key: true
-                }];
+                    alt_key: this.options_data.google.alt_key,
+                }, this.default_data.google.settings[1], this.default_data.google.settings[2]];
+                this.save();
+            }
+            else if( this.options_data.version == 2 ){
+                this.options_data.version = this.default_data.version;
                 this.save();
             }
         }
@@ -224,23 +200,29 @@ Options = {
         this.options_data['excite'].shift_key = false;
         this.options_data['excite'].ctrl_key = false;
         this.options_data['excite'].alt_key = false;
+        this.options_data['excite'].meta_key = false;
         if( this.options_data['excite'].sc1 == "Shift" ) this.options_data['excite'].shift_key = true;
         if( this.options_data['excite'].sc1 == "Ctrl" ) this.options_data['excite'].ctrl_key = true;
         if( this.options_data['excite'].sc1 == "Alt" ) this.options_data['excite'].alt_key = true;
+        if( this.options_data['excite'].sc1 == "Meta" ) this.options_data['excite'].meta_key = true;
         if( this.options_data['excite'].sc2 == "Shift" ) this.options_data['excite'].shift_key = true;
         if( this.options_data['excite'].sc2 == "Ctrl" ) this.options_data['excite'].ctrl_key = true;
         if( this.options_data['excite'].sc2 == "Alt" ) this.options_data['excite'].alt_key = true;
+        if( this.options_data['excite'].sc2 == "Meta" ) this.options_data['excite'].meta_key = true;
         
         for (var i = 0; i < this.options_data['google'].settings.length; i++) {
             this.options_data['google'].settings[i].shift_key = false;
             this.options_data['google'].settings[i].ctrl_key = false;
             this.options_data['google'].settings[i].alt_key = false;
+            this.options_data['google'].settings[i].meta_key = false;
             if (this.options_data['google'].settings[i].sc1 == "Shift") this.options_data['google'].settings[i].shift_key = true;
             if (this.options_data['google'].settings[i].sc1 == "Ctrl") this.options_data['google'].settings[i].ctrl_key = true;
             if (this.options_data['google'].settings[i].sc1 == "Alt") this.options_data['google'].settings[i].alt_key = true;
+            if (this.options_data['google'].settings[i].sc1 == "Meta") this.options_data['google'].settings[i].meta_key = true;
             if (this.options_data['google'].settings[i].sc2 == "Shift") this.options_data['google'].settings[i].shift_key = true;
             if (this.options_data['google'].settings[i].sc2 == "Ctrl") this.options_data['google'].settings[i].ctrl_key = true;
             if (this.options_data['google'].settings[i].sc2 == "Alt") this.options_data['google'].settings[i].alt_key = true;
+            if (this.options_data['google'].settings[i].sc2 == "Meta") this.options_data['google'].settings[i].meta_key = true;
         }
         
         // save
