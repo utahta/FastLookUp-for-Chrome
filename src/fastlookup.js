@@ -95,9 +95,11 @@ Parser = {
         res.push( e );
         
         var branding_e = document.createElement( "div" );
-        branding_e.style.paddingTop = "3px";
+        branding_e.setAttribute( 'id', 'fastlookup_branding' );
         branding_e.innerHTML = branding;
         res.push( branding_e );
+        delete branding_e;
+
         return res;
     },
 
@@ -485,9 +487,10 @@ Style = {
                  'margin:0 !important'];
         var fastlookup_css = "#fastlookup{" + style.join(";") + "}";
         
-        var other_css = "#fastlookup img{padding:0; margin:0; display:inline; border:0; clear:both;}" +
-                        "#fastlookup a{color:#000; margin:0; padding:0;}" +
-                        "#fastlookup p{margin:5px; padding:0;}";
+        var other_css = ["#fastlookup img{padding:0; margin:0; display:inline; border:0; clear:both;}",
+                         "#fastlookup a{color:#000; margin:0; padding:0;}",
+                         "#fastlookup p{margin:5px; padding:0;}",
+                         "#fastlookup_branding {margin:0px; padding-top:3px;}"].join('');
 
         return fastlookup_top_css + fastlookup_css + other_css;
     }
