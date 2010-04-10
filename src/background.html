@@ -18,7 +18,6 @@ ConnectionPool = {
             return;
         }
         this.cons.splice( index, 1 );
-//        console.log( this.cons.length );
     },
 
     indexOf: function( con )
@@ -289,6 +288,18 @@ chrome.extension.onConnect.addListener( function onPortConnect( con ){
     Connection.onMessage.addListener( Receiver.message );
     Connection.onDisconnect.addListener( Receiver.disconnect );
     ConnectionPool.add( con );
+});
+
+chrome.tabs.onUpdated.addListener( function( tabId, changeInfo, tab ){
+    var scheme = tab.url.substring( 0, 5 );
+    if( scheme == 'https' || scheme == 'http:' ){
+        try{
+            chrome.tabs.executeScript( tabId, {file: 'fastlookup.js', allFrames: true} );
+        }
+        catch( e ){
+            chrome.tabs.executeScript( tabId, {file: 'fastlookup.js'} );
+        }
+    }
 });
 
 // ecl.js

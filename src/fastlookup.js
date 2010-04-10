@@ -1,3 +1,8 @@
+// read once.
+if( window['fastlookup-for-chrome-main-loaded'] ){
+    exit;
+}
+window['fastlookup-for-chrome-main-loaded'] = true;
 var loading_img_url = chrome.extension.getURL("loadinfo.gif");
 
 Connection = null; // chrome connection.
@@ -155,7 +160,7 @@ Dialog = {
     {
         if( this.exist() ){
             return;
-        }        
+        }
         // create a dialog element.
         if( !document.getElementById('fastlookup_top') ){
             var d = document.createElement( 'div' );
@@ -388,26 +393,32 @@ Receiver = {
         else if( arg.msgid == "excite_pre" ){
             var res = Parser.excite_pre( arg.txt );
             if( !res.length ){
+            console.log('excite-pre-trans not');
                 System.translation();
             }
             else{
+            console.log('excite-pre-trans post');
                 Connection.postMessage( {msgid:"excite", txt:res[0]} );
             }
         }
         else if( arg.msgid == "excite" ){
             var res = Parser.excite( arg.txt );
             if( !res.length ){
+            console.log('google-trans not');
                 System.translation();
             }
             else{
+            console.log('excite-trans show');
                 Dialog.show( res );
             }
         }
         else if( arg.msgid == "google" ){
             if( !arg.txt ){
+            console.log('google-trans');
                 System.translation();
             }
             else{
+            console.log('google-trans');
                 Dialog.show( Parser.google( arg.txt, arg.branding ) );
             }
         }
@@ -484,13 +495,14 @@ Style = {
                  'font-variant: normal !important',
                  'font-weight: normal !important',
                  'text-align: left !important',
+                 'padding:0 !important',
                  'margin:0 !important'];
         var fastlookup_css = "#fastlookup{" + style.join(";") + "}";
         
         var other_css = ["#fastlookup img{padding:0; margin:0; display:inline; border:0; clear:both;}",
                          "#fastlookup a{color:#000; margin:0; padding:0;}",
                          "#fastlookup p{margin:5px; padding:0;}",
-                         "#fastlookup_branding {margin:0px; padding-top:3px;}"].join('');
+                         "#fastlookup_branding {margin:0px; padding-top:3px !important;}"].join('');
 
         return fastlookup_top_css + fastlookup_css + other_css;
     }
@@ -514,7 +526,7 @@ document.addEventListener( "mouseup", function( ev ){
             return;
         }
         MousePos.set( ev );
-
+        
         System.initialize( txt );
         System.translation();
     }
