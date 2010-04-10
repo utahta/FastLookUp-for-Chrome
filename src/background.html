@@ -54,17 +54,36 @@ Request = {
     {
         this.send( "excite", "http://www.excite.co.jp"+txt );
     },
+    
+    txt:[],
 
-    google: function( txt, from, to )
+    google: function( txt, lang )
     {
-        google.language.translate( txt, from, to, function( res ){
-            if( res.error ){
-                Connection.postMessage( {msgid:"error", errno:""+detect_res.error} );
-                return;
-            }
-            var branding = google.language.getBranding().innerHTML;
-            Connection.postMessage( {msgid:"google", txt:""+res.translation, branding:branding} );
-        });
+        var max_length = lang.length > 3 ? 3 : lang.length; // limit.
+        var translate_txt = new Array(max_length);
+        var count = 0;
+        for( var i = 0; i < max_length; i++ ){
+            // consistent order.
+            var callback = function(_no){
+                var no = _no;
+                return function( res ){
+                    if( res.error ){
+                        Connection.postMessage( {'msgid':'error', 'errno':""+res.error} );
+                        return;
+                    }
+                    count++;
+                    translate_txt[no] = res.translation;
+                    if( count == max_length ){
+                        var branding = google.language.getBranding().innerHTML;
+                        if( lang.length > max_length ){
+                            translate_txt.push( "--- Too many translations :( ---" );
+                        }
+                        Connection.postMessage( {'msgid':'google', 'txt':JSON.stringify(translate_txt), 'branding':branding} );
+                    }
+                }
+            }(i);
+            google.language.translate( txt, lang[i].from, lang[i].to, callback );
+        }
     },
 
     send: function( msgid, url )
@@ -268,7 +287,7 @@ Receiver = {
             Request.excite( arg.txt );
         }
         else if( arg.msgid == "google" ){
-            Request.google( arg.txt, arg.from, arg.to );
+            Request.google( arg.txt, JSON.parse(arg.lang) );
         }
     },
 
@@ -292,7 +311,7 @@ chrome.extension.onConnect.addListener( function onPortConnect( con ){
 
 chrome.tabs.onUpdated.addListener( function( tabId, changeInfo, tab ){
     var scheme = tab.url.substring( 0, 5 );
-    if( scheme == 'https' || scheme == 'http:' ){
+    if( (scheme == 'https' || scheme == 'http:') && changeInfo.status == "loading" ){
         try{
             chrome.tabs.executeScript( tabId, {file: 'fastlookup.js', allFrames: true} );
         }

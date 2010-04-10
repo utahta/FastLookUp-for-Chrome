@@ -1,6 +1,6 @@
 // read once.
 if( window['fastlookup-for-chrome-main-loaded'] ){
-    exit;
+    throw "already loaded.";
 }
 window['fastlookup-for-chrome-main-loaded'] = true;
 var loading_img_url = chrome.extension.getURL("loadinfo.gif");
@@ -94,10 +94,12 @@ Parser = {
     google: function( txt, branding )
     {
         var res = [];
-        var e = document.createElement( "div" );
-        e.setAttribute( 'id', 'fastlookup' );
-        e.innerHTML = txt;
-        res.push( e );
+        for( var i = 0; i < txt.length; i++ ){
+            var e = document.createElement( "div" );
+            e.setAttribute( 'id', 'fastlookup' );
+            e.innerHTML = txt[i];
+            res.push( e );
+        }
         
         var branding_e = document.createElement( "div" );
         branding_e.setAttribute( 'id', 'fastlookup_branding' );
@@ -245,9 +247,9 @@ Dialog = {
 };
 
 System = {
-    txt: "",
     msgid_list: [],
     index: 0,
+    txt: "",
  
     clear: function()
     {
@@ -259,12 +261,11 @@ System = {
         return this.msgid_list.length;
     },
 
-    push: function( msgid, from, to )
+    push: function( msgid, lang )
     {
         this.msgid_list.push( {
-            msgid: msgid,
-            from: from,
-            to: to
+            'msgid': msgid,
+            'lang': lang
         });
     },
     
@@ -300,11 +301,10 @@ System = {
         }
         else{
             var msgid = this.msgid_list[this.index].msgid;
-            var from = this.msgid_list[this.index].from;
-            var to = this.msgid_list[this.index].to;
+            var lang = JSON.stringify( this.msgid_list[this.index].lang );
             this.index++;
             Dialog.loading();
-            Connection.postMessage( {msgid:msgid, from:from, to:to, txt:this.txt} );
+            Connection.postMessage( {'msgid':msgid, 'lang':lang, 'txt':this.txt} );
         }
     },
 
@@ -339,7 +339,7 @@ System = {
             ev.shiftKey == Options.get('excite').shift_key && 
             ev.altKey == Options.get('excite').alt_key &&
             ev.metaKey == Options.get('excite').meta_key ){
-            this.push( "excite_pre" );
+            this.push( "excite_pre", [] );
         }
     },
     
@@ -347,14 +347,21 @@ System = {
     _addGoogleTranslator: function( ev ){
         var google = Options.get('google');
         if( google.use ){
+            var lang = [];
             for( var i = 0; i < google.settings.length; i++ ){
                 if( ev.ctrlKey == google.settings[i].ctrl_key && 
                     ev.shiftKey == google.settings[i].shift_key && 
                     ev.altKey == google.settings[i].alt_key &&
                     ev.metaKey == google.settings[i].meta_key ){
-                    this.push( "google", google.settings[i].from, google.settings[i].to );
-                    break;
+                    
+                    lang.push({
+                        'from': google.settings[i].from,
+                        'to': google.settings[i].to
+                    });
                 }
+            }
+            if( lang.length > 0 ){
+                this.push( "google", lang );
             }
         }
     }
@@ -393,33 +400,27 @@ Receiver = {
         else if( arg.msgid == "excite_pre" ){
             var res = Parser.excite_pre( arg.txt );
             if( !res.length ){
-            console.log('excite-pre-trans not');
                 System.translation();
             }
             else{
-            console.log('excite-pre-trans post');
                 Connection.postMessage( {msgid:"excite", txt:res[0]} );
             }
         }
         else if( arg.msgid == "excite" ){
             var res = Parser.excite( arg.txt );
             if( !res.length ){
-            console.log('google-trans not');
                 System.translation();
             }
             else{
-            console.log('excite-trans show');
                 Dialog.show( res );
             }
         }
         else if( arg.msgid == "google" ){
             if( !arg.txt ){
-            console.log('google-trans');
                 System.translation();
             }
             else{
-            console.log('google-trans');
-                Dialog.show( Parser.google( arg.txt, arg.branding ) );
+                Dialog.show( Parser.google( JSON.parse(arg.txt), arg.branding ) );
             }
         }
         else if( arg.msgid == "error" ){
@@ -479,7 +480,7 @@ Style = {
                  'width: auto !important',
                  'height: auto !important',
                  'display: none',
-                 'padding:7px !important',
+                 'padding:0px 0px 7px 0px !important',
                  'margin:0 !important',
                  'z-index: 999999 !important',
                  '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65) !important',
@@ -495,14 +496,14 @@ Style = {
                  'font-variant: normal !important',
                  'font-weight: normal !important',
                  'text-align: left !important',
-                 'padding:0 !important',
+                 'padding:7px 7px 0px 7px !important',
                  'margin:0 !important'];
         var fastlookup_css = "#fastlookup{" + style.join(";") + "}";
         
         var other_css = ["#fastlookup img{padding:0; margin:0; display:inline; border:0; clear:both;}",
                          "#fastlookup a{color:#000; margin:0; padding:0;}",
                          "#fastlookup p{margin:5px; padding:0;}",
-                         "#fastlookup_branding {margin:0px; padding-top:3px !important;}"].join('');
+                         "#fastlookup_branding {margin:0px; padding:7px 7px 0px 7px !important;}"].join('');
 
         return fastlookup_top_css + fastlookup_css + other_css;
     }
