@@ -1,6 +1,11 @@
+v1.1.4
+    google翻訳でショートカットキーが同じだった場合、まとめて翻訳するように変更。
+
+v1.1.3
+    bug fix.
+
 v1.1.2
-    google の設定項目を可変にしました。
-    You can add or delete shortcut at options page.
+    google の設定項目を可変に変更。
 
 v1.1.1
     metaキーに対応。（MacのCommandキーをショートカットキーとして使えるように。）
