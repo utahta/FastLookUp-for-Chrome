@@ -94,19 +94,23 @@ Parser = {
     google: function( txt, branding )
     {
         var res = [];
+        var e = document.createElement( "div" );
+        e.setAttribute( 'id', 'fastlookup' );
+        
+        var tmp = null;
         for( var i = 0; i < txt.length; i++ ){
-            var e = document.createElement( "div" );
-            e.setAttribute( 'id', 'fastlookup' );
-            e.innerHTML = txt[i];
-            res.push( e );
+            tmp = document.createElement( "div" );
+            tmp.setAttribute( 'class', 'additional' );
+            tmp.innerHTML = txt[i];
+            e.appendChild(tmp);
         }
         
-        var branding_e = document.createElement( "div" );
-        branding_e.setAttribute( 'id', 'fastlookup_branding' );
-        branding_e.innerHTML = branding;
-        res.push( branding_e );
-        delete branding_e;
-
+        tmp = document.createElement( "div" );
+        tmp.setAttribute( 'class', 'branding' );
+        tmp.innerHTML = branding;
+        e.appendChild(tmp);
+        
+        res.push( e );
         return res;
     },
 
@@ -137,19 +141,113 @@ Parser = {
     }
 };
 
-MousePos = {
+Position = {
     x: 0,
     y: 0,
+    range: null,
 
-    set: function( ev )
+    set: function( ev, selection )
     {
-        MousePos.x = ev.pageX;
-        MousePos.y = ev.pageY;
+        this.x = ev.pageX;
+        this.y = ev.pageY;
+
+        if( !selection || !selection.baseNode ){
+            return;
+        }
+        this.range = selection.getRangeAt(0);
+    },
+
+    _adjustMouse: function( d )
+    {
+        d.style.left = (this.x + 15) + "px";
+        d.style.top = (this.y + 15) + "px";
+    },
+    
+    _adjustTop: function( d )
+    {
+        var range = this.range;
+        if( !range ){
+            return;
+        }
+        var offset = 5;
+        var node = document.createElement('span');
+        range.insertNode( node );
+        offsets = this._getOffsets( node );
+        offsets.offsetHeight = node.offsetHeight;
+        node.parentNode.removeChild( node );
+        delete node;
+
+        if( offsets.top - document.body.scrollTop >= d.offsetHeight ){
+            d.style.top = (offsets.top - d.offsetHeight - offset) + 'px';
+        } else {
+            d.style.top = (offsets.top + offsets.offsetHeight + offset) + 'px';
+        }
+        d.style.left = offsets.left + 'px';
+    },
+    
+    _adjustBottom: function( d )
+    {
+        var range = this.range;
+        if( !range ){
+            return;
+        }
+        var offset = 5;
+        var node = document.createElement('span');
+        range.insertNode( node );
+        offsets = this._getOffsets( node );
+        offsets.offsetHeight = node.offsetHeight;
+        node.parentNode.removeChild( node );
+
+        var tmpRange = document.createRange();
+        tmpRange.setStartAfter( range.endContainer );
+        tmpRange.insertNode( node );
+        offsets.top = this._getOffsets( node ).top;
+        node.parentNode.removeChild( node );
+        delete node;
+        delete tmpRange;
+        
+        console.log( (offsets.top - document.body.scrollTop + offsets.offsetHeight + d.offsetHeight) + " <= " + document.body.clientHeight );
+        if( (offsets.top - document.body.scrollTop + offsets.offsetHeight + d.offsetHeight) <= document.body.clientHeight ){
+            d.style.top = (offsets.top + offsets.offsetHeight + offset) + 'px';
+        }
+        else{
+            d.style.top = (offsets.top - d.offsetHeight - offset) + 'px';
+            console.log( "fuga" );
+        }
+        d.style.left = offsets.left + 'px';
+    },
+    
+    _getOffsets: function( el )
+    {
+        var t = l = 0;
+        do{
+            t += el.offsetTop || 0;
+            l += el.offsetLeft || 0;
+            el = el.offsetParent || null;
+        }while(el);
+        return {'top': t, 'left': l};
+    },
+    
+    adjust: function( d )
+    {
+        var opt = Options.get('position');
+        if( opt == 'Top' ){
+            this._adjustTop( d );
+        }
+        else if( opt == 'Bottom' ){
+            this._adjustBottom( d );
+        }
+        else if( opt == 'Mouse' ){
+            this._adjustMouse( d );
+        }
+        else{
+            this._adjustTop( d );
+        }
     },
 
     debugPrint: function()
     {
-        alert( "x:"+MousePos.x+" y:"+MousePos.y );
+        alert( "x:"+this.x+" y:"+this.y );
     }
 };
 
@@ -205,12 +303,6 @@ Dialog = {
         }
     },
 
-    position: function()
-    {
-        this.top_obj.style.left = (MousePos.x + 15) + "px";
-        this.top_obj.style.top = (MousePos.y + 15) + "px";
-    },
-
     show: function( res )
     {
         if( !res.length ){
@@ -222,7 +314,7 @@ Dialog = {
                 Dialog.top_obj.appendChild( e );
             });
             this.top_obj.style.display = 'block';
-            this.position();
+            Position.adjust( this.top_obj );
         }
     },
 
@@ -472,19 +564,20 @@ Style = {
         var style;
         style = ['position: absolute !important',
                  'border: 1px solid #000 !important',
+                 'opacity: ' + Options.get('opacity') + ' !important',
                  'background: ' + Options.get('background_color') + " !important",
                  'top: 0',
                  'left: 0',
-                 'max-width: 70% !important',
+                 'max-width: 50% !important',
                  'max-height: 50% !important',
                  'width: auto !important',
                  'height: auto !important',
                  'display: none',
-                 'padding:0px 0px 7px 0px !important',
+                 '-webkit-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.65) !important',
+                 '-webkit-border-radius: 10px !important',
+                 'padding:0 !important',
                  'margin:0 !important',
                  'z-index: 999999 !important',
-                 '-webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.65) !important',
-                 '-webkit-border-radius: 7px !important',
                  'overflow: auto !important'];
         var fastlookup_top_css = "#fastlookup_top{" + style.join(";") + "}";
         
@@ -492,18 +585,16 @@ Style = {
                  'font-family:'+ Options.get('font_family') + ' !important',
                  'font-size: '+ Options.get('font_size') +'px !important',
                  'font-style: ' + Options.get('font_style') + ' !important',
-                 'opacity: ' + Options.get('opacity') + ' !important',
                  'font-variant: normal !important',
                  'font-weight: normal !important',
-                 'text-align: left !important',
-                 'padding:7px 7px 0px 7px !important',
-                 'margin:0 !important'];
-        var fastlookup_css = "#fastlookup{" + style.join(";") + "}";
+                 'text-align: left !important'];
+        var fastlookup_css = "#fastlookup{" + style.join(";") + "; margin:0 !important; padding:8px !important;}";
         
-        var other_css = ["#fastlookup img{padding:0; margin:0; display:inline; border:0; clear:both;}",
-                         "#fastlookup a{color:#000; margin:0; padding:0;}",
-                         "#fastlookup p{margin:5px; padding:0;}",
-                         "#fastlookup_branding {margin:0px; padding:7px 7px 0px 7px !important;}"].join('');
+        var other_css = ["#fastlookup img{padding:0 !important; margin:0 !important; display:inline !important; border:0 !important; clear:both !important;}",
+                         "#fastlookup a{color:#000 !important; margin:0 !important; padding:0 !important;}",
+                         "#fastlookup p{margin:0 !important; padding:8px !important;}",
+                         "#fastlookup .additional{" + style.join(";") + "; margin:0px !important; padding:0px 0px 8px 0px !important;}",
+                         "#fastlookup .branding{margin:0px !important; padding:0px 0px 0px 0px !important;}"].join('');
 
         return fastlookup_top_css + fastlookup_css + other_css;
     }
@@ -526,7 +617,7 @@ document.addEventListener( "mouseup", function( ev ){
         if( !txt || txt.match(/^\s+$/) || !System.chooseTranslator( ev, txt ) ){
             return;
         }
-        MousePos.set( ev );
+        Position.set( ev, window.getSelection() );
         
         System.initialize( txt );
         System.translation();
@@ -536,7 +627,7 @@ document.addEventListener( "mouseup", function( ev ){
 document.addEventListener( "mousedown", function( ev ){
     if( !Utility.checkId( ev, 'fastlookup_top' ) ){
         if( Dialog.exist() ){
-            window.getSelection().removeAllRanges();
+            window.getSelection().empty();
             Dialog.remove();
         }
         System.clear();

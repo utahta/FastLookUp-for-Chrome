@@ -1,3 +1,7 @@
+v1.1.5
+    オプションに表示位置を追加。
+    add UI option.(position)
+    
 v1.1.4
     google翻訳でショートカットキーが同じだった場合、まとめて翻訳するように変更。
 
@@ -38,7 +42,7 @@ v0.1.7.1
     更新通知を全てのコンテンツスクリプトに行うように変更。
 
 v0.1.7
-    add options.(background-color, font-color, font-family, font-style, opacity)
+    add UI options.(background-color, font-color, font-family, font-style, opacity)
     when you saved options, application notifies it to all contents-script.
     オプションの項目を追加。(background-color, font-color, font-family, font-style, opacity)
     オプション保存時、更新通知を行うように変更。

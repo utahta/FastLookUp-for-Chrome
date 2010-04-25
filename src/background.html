@@ -76,7 +76,7 @@ Request = {
                     if( count == max_length ){
                         var branding = google.language.getBranding().innerHTML;
                         if( lang.length > max_length ){
-                            translate_txt.push( "--- Too many translations :( ---" );
+                            translate_txt.push( "--- Too many translations ---" );
                         }
                         Connection.postMessage( {'msgid':'google', 'txt':JSON.stringify(translate_txt), 'branding':branding} );
                     }
@@ -105,10 +105,11 @@ Options = {
         version: 3,
         background_color: '#ffffff',
         font_color: '#000000',
-        font_size: 13,
+        font_size: 16,
         font_family: "Arial, Helvetica, sans-serif",
         font_style: "normal",
-        opacity: 1.0,
+        opacity: 0.9,
+        position: "Top",
         excite:{
             use:'true',
             sc1:'none',
@@ -165,6 +166,7 @@ Options = {
             // if options not supported version
             if( !this.options_data.version ){
                 this.options_data.version = this.default_data.version;
+                this.options_data.position = "Top";
                 this.options_data.google.settings = [{
                     from: '',
                     to: 'ja',
@@ -178,6 +180,7 @@ Options = {
             }
             else if( this.options_data.version == 1 ){
                 this.options_data.version = this.default_data.version;
+                this.options_data.position = "Top";
                 this.options_data.google.settings = [{
                     from: this.options_data.google.from,
                     to: this.options_data.google.to,
@@ -189,8 +192,10 @@ Options = {
                 }, this.default_data.google.settings[1], this.default_data.google.settings[2]];
                 this.save();
             }
-            else if( this.options_data.version == 2 ){
+            else if( this.options_data.version == 2 || 
+                     this.options_data.version == 3 ){
                 this.options_data.version = this.default_data.version;
+                this.options_data.position = "Top";
                 this.save();
             }
         }
