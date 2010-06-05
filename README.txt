@@ -1,4 +1,4 @@
-Copyright (c) 2010 Yuta All rights reserved.
+Copyright (c) 2010 utah All rights reserved.
 
 備考:
 2010.03.27
