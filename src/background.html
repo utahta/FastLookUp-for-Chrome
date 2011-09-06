@@ -316,7 +316,7 @@ chrome.extension.onConnect.addListener( function onPortConnect( con ){
 
 chrome.tabs.onUpdated.addListener( function( tabId, changeInfo, tab ){
     var scheme = tab.url.substring( 0, 5 );
-    if( (scheme == 'https' || scheme == 'http:') && changeInfo.status == "loading" ){
+    if( (scheme == 'https' || scheme == 'http:') ){
         try{
             chrome.tabs.executeScript( tabId, {file: 'fastlookup.js', allFrames: true} );
         }

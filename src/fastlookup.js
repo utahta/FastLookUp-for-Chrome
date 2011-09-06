@@ -1,5 +1,5 @@
 // read once.
-if( window['fastlookup-for-chrome-main-loaded'] ){
+if( window['fastlookup-for-chrome-main-loaded'] === true ){
     throw "already loaded.";
 }
 window['fastlookup-for-chrome-main-loaded'] = true;
@@ -534,7 +534,17 @@ Style = {
         Style.text_node = document.createTextNode( Style._getStyle() );
         Style.css.type = "text/css";
         Style.css.appendChild( Style.text_node );
-        document.getElementsByTagName( "head" )[0].appendChild( Style.css );
+//        document.getElementsByTagName( "head" )[0].appendChild( Style.css );
+        var head = document.getElementsByTagName( "head" );
+        if( head.length == 0 ){
+        	var e = document.createElement("head");
+        	e.appendChild( Style.css );
+        	document.appendChild( e );
+        }
+        else{
+        	var e = head[0];
+        	e.appendChild( Style.css );
+        }
     },
 
     /**
@@ -610,7 +620,7 @@ Connection.onMessage.addListener( Receiver.message );
 Connection.postMessage( {msgid:"options"} );
 
 // trigger.
-document.addEventListener( "mouseup", function( ev ){
+document.body.addEventListener( "mouseup", function( ev ){
     if( !Utility.checkId( ev, 'fastlookup_top' ) ){
         var txt = window.getSelection().toString();
         // empty or only space or not select short cut?
@@ -624,7 +634,7 @@ document.addEventListener( "mouseup", function( ev ){
     }
 }, false );
 
-document.addEventListener( "mousedown", function( ev ){
+document.body.addEventListener( "mousedown", function( ev ){
     if( !Utility.checkId( ev, 'fastlookup_top' ) ){
         if( Dialog.exist() ){
             window.getSelection().empty();

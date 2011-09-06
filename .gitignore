@@ -3,3 +3,4 @@
 .project
 .settings
 .tmp_*
+.buildpath

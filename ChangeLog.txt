@@ -1,3 +1,6 @@
+v1.1.6
+    名前を変更。FastLookUp for Chrome → FastLookUp
+
 v1.1.5
     オプションに表示位置を追加。
     add UI option.(position)
